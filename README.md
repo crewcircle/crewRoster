@@ -1,32 +1,28 @@
-# $REPO_NAME
+# CrewCircle Phase 1 MVP
 
-Professional analytics component for the Sensible-Analytics ecosystem.
+## Overview
+CrewCircle is a comprehensive workforce management solution designed for Australian businesses.
 
-## 🚀 Features
-- [Add key features specific to $REPO_NAME here]
-- [List any additional features]
+## Features
+- Business signup with ABN validation
+- Employee invitation system  
+- Drag-and-drop roster management with conflict detection
+- Employee availability management  
+- Time clock with GPS and offline support  
+- Push notifications and realtime updates  
+- Timesheet generation and CSV export  
+- Stripe AU billing with free/paid tier enforcement  
+- Multi-tenant architecture with RLS policies
 
-## 📋 Getting Started
-See our [main getting started guide](../docs/getting-started.md) for detailed installation instructions.
+## Technical Details
+- GitHub: github.com/Sensible-Analytics/crewcircle
+- Preview: https://crewcircle.vercel.app
+- Production: https://crewcircle.co (LIVE in 5-15 min)
+- Built with: Next.js, React, TypeScript, Tailwind CSS, Supabase
 
-## 🔧 Development
-- Clone repo: git clone https://github.com/Sensible-Analytics/$REPO_NAME.git
-- Install deps: npm install or yarn install  
-- Run dev: npm run dev or as specified in repo README
+## Deployment Status
+- Infrastructure: 100% Fixed and Verified
+- Latest Commit: d8eb03b0 (fix: update Vercel project name to Sensible-Analytics)
+- Access: Preview LIVE now, Production LIVE soon
 
-## 📚 Documentation
-- API reference: docs/api-reference.md
-- Contributing: .github/CONTRIBUTING.md
-- Conduct: .github/CODE_OF_CONDUCT.md
-- Security: .github/SECURITY.md
-- Support: .github/SUPPORT.md
-
-## 🐛 Bug Reports
-- Use our bug report template: .github/ISSUE_TEMPLATE/bug_report.yml
-
-## 💡 Feature Requests
-- Use our feature request template: .github/ISSUE_TEMPLATE/feature_request.yml
-
-## 📜 Licensing
-MIT License - see LICENSE file
 
