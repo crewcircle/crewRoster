@@ -328,13 +328,13 @@ test.describe('Accessibility', () => {
     // Clerk renders in shadow DOM - flaky visibility checks
     await page.goto('/signup');
     await captureStep(page, '00_signup_page');
-    // Clerk renders asynchronously - wait for it to be visible
-    await expect(page.locator('[class*="cl-"]').first()).toBeVisible({ timeout: 15000 });
+    // Clerk renders asynchronously — wait for the form container
+    await page.waitForSelector('[class*="cl-"]', { state: 'attached', timeout: 10000 });
+    await expect(page.locator('[class*="cl-"]').first()).toBeVisible();
     await captureStep(page, '01_form_visible');
   });
 
-  test.skip('signup form submit button is accessible', async ({ page }) => {
-    // Clerk renders in shadow DOM - flaky visibility checks
+  test('signup form submit button is accessible', async ({ page }) => {
     await page.goto('/signup');
     await captureStep(page, '00_signup_page');
     // Clerk buttons may have aria-hidden, check the container is interactive instead
