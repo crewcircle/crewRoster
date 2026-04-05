@@ -203,7 +203,8 @@ test.describe('Navigation Flows', () => {
     await captureStep(page, '00_landing_page');
     await page.click('a[href="/signup"]:first-of-type');
     await expect(page).toHaveURL(/\/signup/);
-    await expect(page.locator('[class*="cl-"]').first()).toBeVisible({ timeout: 15000 });
+    await page.waitForSelector('[class*="cl-"]', { state: 'attached', timeout: 10000 });
+    await expect(page.locator('[class*="cl-"]').first()).toBeVisible();
     await captureStep(page, '01_navigated_to_signup');
   });
 
