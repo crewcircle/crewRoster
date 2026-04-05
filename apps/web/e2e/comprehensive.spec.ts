@@ -66,8 +66,7 @@ test.describe('Landing Page', () => {
     const pricingCTA = page.locator('a:has-text("Start for Free")').first();
     await pricingCTA.click();
     await expect(page).toHaveURL(/\/signup/);
-    await page.waitForSelector('[class*="cl-"]', { state: 'attached', timeout: 10000 });
-    await expect(page.locator('[class*="cl-"]').first()).toBeVisible();
+    await expect(page.locator('[class*="cl-"]').first()).toBeVisible({ timeout: 15000 });
     await captureStep(page, '07_pricing_cta_navigated');
   });
 
