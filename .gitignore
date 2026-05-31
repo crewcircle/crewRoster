@@ -1,99 +1,76 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
+# Next.js
+.next/
+out/
 
-# testing
-/coverage
-*.lcov
-*.lcov.info
-*.gcov
-*.gcda
-*.gcno
+# Expo / React Native
+.expo/
+android/
+ios/
+*.jks
+*.p12
+*.key
+*.mobileprovision
+*.ipa
+*.app
 
-# ios
-/Pods
-/*.xcworkspace
-ios/.xcode.env.local
-ios/CardScannerApp.xcworkspace/
-ios/Podfile.lock
+# Supabase
+supabase/.temp/
+supabase/supabase/.temp/
 
-# android
-/.gradle
-/android/.gradle
-/**/build
-/*/gradle-app.setting
-/android/app/src/main/assets/index.android.bundle
+# Build artifacts
+dist/
+build/
 
-# Avoid ignoring Gradle wrapper jar file (.jar) in gradle-wrapper.properties
-!/gradle-wrapper.jar
-
-# Android build artifacts
-android/settings.gradle.backup*
-
-# Misc
+# OS
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+Thumbs.db
 
-# Expo
-.expo
-webpack.config.js
-
-# Watchman
-.watchmanconfig
-
-# CodePush
-.codepush/
-
-# Symbolication
-/symbols/
-
-# Firebase
-/firebase.json
-
-# Xcode
- DerivedData/
-*.mode1v3
-*.mode2v3
-*.perspectivev3
-![Aa]*.xcassets
-
-# CocoaPods
-Pods/
-
-# Buck
-.buckd/
-*.asc
-
-# fb-schema/
-*fb-schema*.txt
-
-# RNCLI
-.rncache/
-
-# Superseded by React Native 0.65
-/.expo/
-
-# Additional files to ignore
-.sisyphus/
-.superset/
+# IDE
 .vscode/
-AGENTS.md
-Gemfile
-Gemfile.lock
-docs/
-fastlane/
-scripts/
-setup-and-verify.sh
-vendor/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env*.local
+
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-yarn.lock
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+*.png
+*.webm
+*.new
+
+# Turbo cache
+.turbo/
+
+# Vercel
+.vercel/
+
+# Agent artifacts
+.sisyphus/
+.superset/
+
+# Backup files
+*.backup
+*.bak
+
+# Temporary files
+*.tmp
+*.temp
+.vercel
+.env.vercel
