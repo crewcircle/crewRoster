@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: crewRoster
+  description: "Australian workforce management for shift-based businesses - rostering, time tracking, team management"
+  annotations:
+    github.com/project-slug: crewcircle/crewRoster
+spec:
+  type: website
+  lifecycle: production
+  owner: crewcircle/engineering
