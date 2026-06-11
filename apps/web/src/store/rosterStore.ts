@@ -49,7 +49,12 @@ export const useRosterStore = create<RosterState>()(
     profiles: [],
     shifts: [],
     roster: null,
-    selectedWeekStart: new Date().toISOString().split('T')[0],
+    selectedWeekStart: (() => {
+      const today = new Date();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+      return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+    })(),
     loading: true,
     operationError: null,
     isOperating: false,

@@ -135,9 +135,10 @@ export async function POST(request: NextRequest) {
           endTime.setDate(endTime.getDate() + 7);
 
           await sql`
-            INSERT INTO shifts (tenant_id, roster_id, profile_id, start_time, end_time, role_label, notes)
+            INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
             VALUES (
               ${shift.tenant_id},
+              ${roster[0].location_id},
               ${newRoster.id},
               ${shift.profile_id},
               ${startTime.toISOString()},
@@ -156,13 +157,20 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ error: 'rosterId and shifts required' }, { status: 400 });
         }
 
+        const roster = await sql`SELECT location_id FROM rosters WHERE id = ${rosterId}`;
+        if (roster.length === 0) {
+          return NextResponse.json({ error: 'Roster not found' }, { status: 404 });
+        }
+        const locationId = roster[0].location_id;
+
         await sql`DELETE FROM shifts WHERE roster_id = ${rosterId}`;
 
         for (const shift of shifts) {
           await sql`
-            INSERT INTO shifts (tenant_id, roster_id, profile_id, start_time, end_time, role_label, notes)
+            INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
             VALUES (
               ${tenantId},
+              ${locationId},
               ${rosterId},
               ${shift.profile_id},
               ${shift.start_time},
@@ -191,10 +199,20 @@ export async function POST(request: NextRequest) {
 
       case 'create-shift': {
         const { profileId, startTime, endTime, roleLabel, notes } = body;
+
+        let locationId: string | null = null;
+        if (rosterId) {
+          const roster = await sql`SELECT location_id FROM rosters WHERE id = ${rosterId}`;
+          if (roster.length > 0) {
+            locationId = roster[0].location_id;
+          }
+        }
+
         const newShifts = await sql`
-          INSERT INTO shifts (tenant_id, roster_id, profile_id, start_time, end_time, role_label, notes)
+          INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
           VALUES (
             ${tenantId},
+            ${locationId},
             ${rosterId || null},
             ${profileId},
             ${startTime},

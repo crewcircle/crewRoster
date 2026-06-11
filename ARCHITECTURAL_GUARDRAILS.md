@@ -1,10 +1,10 @@
 # Architectural Guardrails
 
-> **Project:** CrewCircle — Australian Workforce Management Platform
+> **Project:** crewRoster — Australian Workforce Management Platform
 > **Last Updated:** 2026-04-05
 > **Status:** Active
 
-These guardrails define the non-negotiable architectural principles, tech stack constraints, and development standards for CrewCircle. All contributors (human and AI) must adhere to them.
+These guardrails define the non-negotiable architectural principles, tech stack constraints, and development standards for crewRoster. All contributors (human and AI) must adhere to them.
 
 ---
 
@@ -71,7 +71,7 @@ These guardrails define the non-negotiable architectural principles, tech stack 
 ### 2.1 Monorepo Structure
 
 ```
-crewcircle/
+crewroster/
 ├── apps/
 │   ├── web/          # Next.js 16 web application
 │   └── mobile/       # React Native (Expo)

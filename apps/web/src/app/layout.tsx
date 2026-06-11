@@ -14,10 +14,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://crewcircle.co'),
+  metadataBase: new URL('https://roster.crewcircle.co'),
   title: {
-    default: 'CrewCircle - Australian Workforce Management for SMBs',
-    template: '%s | CrewCircle',
+    default: 'crewRoster - Australian Workforce Management for SMBs',
+    template: '%s | crewRoster',
   },
   description: 'Roster scheduling, time tracking, and team management for Australian cafes, retail shops, and service businesses. GPS-verified time clock, Fair Work Act compliant.',
   keywords: [
@@ -40,22 +40,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_AU',
-    url: 'https://crewcircle.co',
-    siteName: 'CrewCircle',
-    title: 'CrewCircle - Australian Workforce Management for SMBs',
+    url: 'https://roster.crewcircle.co',
+    siteName: 'crewRoster',
+    title: 'crewRoster - Australian Workforce Management for SMBs',
     description: 'Roster scheduling, time tracking, and team management for Australian cafes, retail shops, and service businesses.',
     images: [
       {
         url: '/og-image.svg',
         width: 1200,
         height: 630,
-        alt: 'CrewCircle - Australian Workforce Management',
+        alt: 'crewRoster - Australian Workforce Management',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CrewCircle - Australian Workforce Management for SMBs',
+    title: 'crewRoster - Australian Workforce Management for SMBs',
     description: 'Roster scheduling, time tracking, and team management for Australian cafes, retail shops, and service businesses.',
     images: ['/og-image.svg'],
   },
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://crewcircle.co',
+    canonical: 'https://roster.crewcircle.co',
   },
 };
 

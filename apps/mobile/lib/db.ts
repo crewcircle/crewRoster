@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 export async function initDb() {
-  const db = await SQLite.openDatabaseAsync('crewcircle.db');
+  const db = await SQLite.openDatabaseAsync('crewroster.db');
   
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
@@ -26,7 +26,7 @@ export async function initDb() {
 }
 
 export async function savePendingEvent(event: any) {
-  const db = await SQLite.openDatabaseAsync('crewcircle.db');
+  const db = await SQLite.openDatabaseAsync('crewroster.db');
   await db.runAsync(
     `INSERT INTO pending_clock_events (
       profile_id, location_id, shift_id, type, recorded_at, 
@@ -42,16 +42,16 @@ export async function savePendingEvent(event: any) {
 }
 
 export async function getUnsyncedEvents() {
-  const db = await SQLite.openDatabaseAsync('crewcircle.db');
+  const db = await SQLite.openDatabaseAsync('crewroster.db');
   return await db.getAllAsync('SELECT * FROM pending_clock_events WHERE synced = 0');
 }
 
 export async function markEventSynced(id: number) {
-  const db = await SQLite.openDatabaseAsync('crewcircle.db');
+  const db = await SQLite.openDatabaseAsync('crewroster.db');
   await db.runAsync('UPDATE pending_clock_events SET synced = 1 WHERE id = ?', [id]);
 }
 
 export async function clearSyncedEvents() {
-  const db = await SQLite.openDatabaseAsync('crewcircle.db');
+  const db = await SQLite.openDatabaseAsync('crewroster.db');
   await db.runAsync('DELETE FROM pending_clock_events WHERE synced = 1');
 }

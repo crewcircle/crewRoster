@@ -29,7 +29,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>CrewCircle</Text>
+      <Text style={styles.title}>crewRoster</Text>
       <Text style={styles.subtitle}>Employee Login</Text>
 
       <TextInput
