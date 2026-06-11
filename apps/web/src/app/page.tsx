@@ -120,79 +120,22 @@ export default function LandingPage() {
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">Watch how easy it is to create a roster, send it to your team, and track their hours.</p>
           </div>
           
-          {/* Animated Demo GIF/Screenshot */}
+          {/* Video Demo - See It In Action */}
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-900">
-              {/* Browser chrome */}
-              <div className="bg-gray-800 px-4 py-3 flex items-center gap-2">
-                <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                </div>
-                <div className="flex-1 text-center">
-                  <span className="text-xs text-gray-400">roster.crewcircle.co/roster</span>
-                </div>
-              </div>
-              {/* Demo content - animated roster UI */}
-              <div className="bg-gray-100 p-6">
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">📅 Weekly Roster - The Daily Grind</h3>
-                    <span className="text-sm text-gray-500">Mar 24 - Mar 30</span>
-                  </div>
-                  {/* Animated roster grid */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-4 animate-pulse">
-                      <div className="w-24 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-medium text-orange-700">Sarah 👋</span>
-                      </div>
-                      <div className="flex gap-2">
-                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map((day, i) => (
-                          <div key={day} className={`w-12 h-10 rounded-lg flex items-center justify-center text-xs font-medium ${i < 3 ? 'bg-orange-400 text-white' : 'bg-gray-100'}`}>
-                            {i < 3 ? '7-3' : ''}
-                          </div>
-                        ))}
-                        <div className="w-12 h-10 bg-green-400 text-white rounded-lg flex items-center justify-center text-xs font-medium">10-4</div>
-                        <div className="w-12 h-10 bg-purple-400 text-white rounded-lg flex items-center justify-center text-xs font-medium">9-3</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-medium text-blue-700">Jake 🎸</span>
-                      </div>
-                      <div className="flex gap-2">
-                        {['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-                          <div key={day} className={`w-12 h-10 rounded-lg flex items-center justify-center text-xs font-medium ${day ? 'bg-blue-400 text-white' : 'bg-gray-100'}`}>
-                            {day ? '2-10' : ''}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-medium text-green-700">Emma 🌿</span>
-                      </div>
-                      <div className="flex gap-2">
-                        {['Mon', 'Tue', '', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => (
-                          <div key={day} className={`w-12 h-10 rounded-lg flex items-center justify-center text-xs font-medium ${day ? 'bg-green-400 text-white' : 'bg-gray-100'}`}>
-                            {day ? '8-4' : ''}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  {/* Publish button */}
-                  <div className="mt-6 pt-6 border-t flex items-center justify-between">
-                    <span className="text-sm text-gray-500">3 employees • 42 hours scheduled</span>
-                    <button className="px-6 py-2 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 transition-colors">
-                      📤 Publish Roster
-                    </button>
-                  </div>
-                </div>
-              </div>
+              {/* Video player with custom controls */}
+              <video
+                className="w-full h-auto"
+                controls
+                controlsList="nodownload"
+                poster="/og-image.svg"
+                preload="metadata"
+              >
+                <source src="/crew-roster-demo.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
             </div>
-            <p className="text-center text-gray-500 mt-4 text-sm">Your team gets notified instantly when the roster goes live</p>
+            <p className="text-center text-gray-500 mt-4 text-sm">Watch how crewRoster makes rostering simple — drag & drop shifts, publish instantly, track hours with GPS clock-in</p>
           </div>
         </div>
       </section>
