@@ -11,7 +11,7 @@ export default function LandingPage() {
           <Link href="#features" className="text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors">How it works</Link>
           <Link href="#pricing" className="text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors">Pricing</Link>
           <Link href="/blog" className="text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors">Blog</Link>
-          <Link href="https://github.com/Sensible-Analytics/crewcircle" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors flex items-center gap-1">
+          <Link href="https://github.com/Sensible-Analytics/crewroster" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors flex items-center gap-1">
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             GitHub
           </Link>
@@ -34,7 +34,7 @@ export default function LandingPage() {
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-xl leading-relaxed">
               Stop fighting with WhatsApp chains and scribbled whiteboards. 
-              CrewCircle helps your small team know when they&apos;re working — no dramas.
+              crewRoster helps your small team know when they&apos;re working — no dramas.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/signup" className="px-8 py-4 bg-orange-500 text-white rounded-xl text-lg font-bold hover:bg-orange-600 transition-all hover:scale-105 shadow-lg hover:shadow-xl text-center">
@@ -131,7 +131,7 @@ export default function LandingPage() {
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
                 <div className="flex-1 text-center">
-                  <span className="text-xs text-gray-400">crewcircle.co/roster</span>
+                  <span className="text-xs text-gray-400">roster.crewcircle.co/roster</span>
                 </div>
               </div>
               {/* Demo content - animated roster UI */}
@@ -250,7 +250,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium mb-4">How it works</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See CrewCircle in action</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">See crewRoster in action</h2>
             <p className="text-gray-600 max-w-2xl mx-auto text-lg">From owner to employee - here's how everyone uses the app.</p>
           </div>
 
@@ -260,7 +260,7 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white text-xl">👩‍💼</div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">Maria's Journey - The Owner</h3>
-                <p className="text-gray-500 text-sm">Using CrewCircle on her laptop to manage the team</p>
+                <p className="text-gray-500 text-sm">Using crewRoster on her laptop to manage the team</p>
               </div>
             </div>
 
@@ -273,7 +273,7 @@ export default function LandingPage() {
                   <p className="text-sm text-gray-600 mb-4">Enter your email & business name. No ABN needed for trial!</p>
                   {/* Screenshot mockup */}
                   <div className="bg-white rounded-lg border shadow-sm p-4">
-                    <div className="text-xs text-gray-400 mb-2">crewcircle.co/signup</div>
+                    <div className="text-xs text-gray-400 mb-2">roster.crewcircle.co/signup</div>
                     <div className="space-y-2">
                       <div className="h-2 bg-gray-100 rounded w-3/4"></div>
                       <div className="h-2 bg-gray-100 rounded w-1/2"></div>
@@ -297,7 +297,7 @@ export default function LandingPage() {
                   <p className="text-sm text-gray-600 mb-4">Drag & drop shifts onto the weekly calendar.</p>
                   {/* Screenshot mockup */}
                   <div className="bg-white rounded-lg border shadow-sm p-4">
-                    <div className="text-xs text-gray-400 mb-2">crewcircle.co/roster</div>
+                    <div className="text-xs text-gray-400 mb-2">roster.crewcircle.co/roster</div>
                     <div className="grid grid-cols-7 gap-1">
                       {['M','T','W','T','F','S','S'].map(d => <div key={d} className="text-xs text-center text-gray-300">{d}</div>)}
                       <div className="col-span-7 flex gap-1 mt-1">
@@ -379,7 +379,7 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-xl">👨‍🍳</div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">Jake's Journey - The Employee</h3>
-                <p className="text-gray-500 text-sm">Using CrewCircle app on his phone to check shifts & clock in</p>
+                <p className="text-gray-500 text-sm">Using crewRoster app on his phone to check shifts & clock in</p>
               </div>
             </div>
 
@@ -702,8 +702,8 @@ export default function LandingPage() {
             <Link href="/signup" className="px-8 py-4 bg-white text-orange-600 rounded-xl text-lg font-bold hover:bg-gray-100 transition-all shadow-lg">
               Start Your Free Trial
             </Link>
-            <Link href="https://github.com/Sensible-Analytics/crewcircle" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl text-lg font-bold hover:bg-white/10 transition-all">
-              View on GitHub
+            <Link href="https://github.com/Sensible-Analytics/crewroster" target="_blank" rel="noopener noreferrer" className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-xl text-lg font-bold hover:bg-white/10 transition-all">
+               View on GitHub
             </Link>
           </div>
         </div>
@@ -720,10 +720,10 @@ export default function LandingPage() {
                 Built with ❤️ in Melbourne.
               </p>
               <div className="flex items-center gap-4">
-                <a href="https://github.com/Sensible-Analytics/crewcircle" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <a href="https://github.com/Sensible-Analytics/crewroster" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                 </a>
-                <a href="https://twitter.com/crewcircleapp" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                <a href="https://twitter.com/crewrosterapp" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 </a>
               </div>
@@ -742,8 +742,8 @@ export default function LandingPage() {
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><a href="https://github.com/Sensible-Analytics/crewcircle/wiki" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="https://github.com/Sensible-Analytics/crewcircle" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Open Source</a></li>
+                <li><a href="https://github.com/Sensible-Analytics/crewroster/wiki" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
+                <li><a href="https://github.com/Sensible-Analytics/crewroster" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Open Source</a></li>
               </ul>
             </div>
           </div>
@@ -751,7 +751,7 @@ export default function LandingPage() {
             <p className="text-sm">© 2026 CrewCircle. Data hosted in Sydney, Australia.</p>
             <p className="text-sm">
               Made with ❤️ by{" "}
-              <a href="https://crewcircle.co" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
+              <a href="https://roster.crewcircle.co" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
                 CrewCircle
               </a>
             </p>

@@ -1,6 +1,6 @@
 export default {
-  name: 'crewcircle',
-  slug: 'crewcircle',
+  name: 'crewRoster',
+  slug: 'crewroster',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',

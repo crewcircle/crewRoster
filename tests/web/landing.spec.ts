@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Landing Page', () => {
   test('landing page loads with correct title', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/CrewCircle/);
+    await expect(page).toHaveTitle(/crewRoster/);
     await page.screenshot({ path: '.sisyphus/evidence/landing-page.png' });
   });
 

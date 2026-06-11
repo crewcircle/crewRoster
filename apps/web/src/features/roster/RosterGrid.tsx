@@ -439,10 +439,13 @@ const RosterGrid: React.FC = () => {
     );
   };
 
-  // Helper function to get day of week from timestamp
+  // Helper function to get day of week from timestamp (in Sydney timezone)
   const getDayFromTimestamp = (timestamp: string): number => {
     const date = new Date(timestamp);
-    return date.getUTCDay(); // 0 = Sunday, 6 = Saturday
+    // Use Intl.DateTimeFormat to get Sydney day-of-week independent of host timezone
+    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Australia/Sydney', weekday: 'short' });
+    const dayName = formatter.format(date); // 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(dayName);
   };
 
    // Week navigation
@@ -485,6 +488,7 @@ const RosterGrid: React.FC = () => {
 
   // Handle copy forward with confirmation
   const handleCopyForward = async () => {
+    if (isDemoMode) return;
     if (window.confirm('Copy shifts from this roster to the next week?')) {
       const success = await copyForwardRoster();
       if (!success && operationError) {

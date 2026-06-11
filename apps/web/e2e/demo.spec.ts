@@ -6,7 +6,7 @@ test.describe('Demo Page - Initial State', () => {
   });
 
   test('page loads with correct heading', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Try CrewCircle Demo');
+    await expect(page.locator('h1')).toContainText('Try crewRoster Demo');
   });
 
   test('page shows cafe name', async ({ page }) => {

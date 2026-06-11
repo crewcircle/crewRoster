@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe.serial('Production Smoke Test', () => {
   test('landing page loads', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/CrewCircle/);
+    await expect(page).toHaveTitle(/crewRoster/);
   });
 
   test('login page is accessible', async ({ page }) => {

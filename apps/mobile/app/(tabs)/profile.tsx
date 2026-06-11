@@ -40,7 +40,7 @@ export default function ProfileScreen() {
           </View>
           <Text style={styles.email}>{user?.email || 'User'}</Text>
           <Text style={styles.role}>Employee</Text>
-          <Text style={styles.business}>CrewCircle Business</Text>
+          <Text style={styles.business}>crewRoster Business</Text>
         </View>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

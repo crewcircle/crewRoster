@@ -15,11 +15,11 @@ test.describe('Landing Page', () => {
   });
 
   test('page loads successfully', async ({ page }) => {
-    await expect(page).toHaveTitle(/CrewCircle|Create Next App/);
+    await expect(page).toHaveTitle(/crewRoster|Create Next App/);
     await captureStep(page, '01_title_check');
   });
 
-  test('shows navigation with CrewCircle branding', async ({ page }) => {
+  test('shows navigation with crewRoster branding', async ({ page }) => {
     await expect(page.locator('text=CrewCircle').first()).toBeVisible();
     await captureStep(page, '02_nav_visible');
   });
@@ -312,7 +312,7 @@ test.describe('Responsive Design', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await captureStep(page, '00_mobile_landing');
-    await expect(page).toHaveTitle(/CrewCircle|Create Next App/);
+    await expect(page).toHaveTitle(/crewRoster|Create Next App/);
   });
 
   test('mobile view - hamburger menu appears', async ({ page }) => {
@@ -435,7 +435,7 @@ test.describe('Try Demo Button', () => {
     const tryDemoBtn = page.locator('a[href="/demo"]').first();
     await tryDemoBtn.click();
     await expect(page).toHaveURL(/\/demo/);
-    await expect(page.locator('h1')).toContainText('Try CrewCircle Demo');
+    await expect(page.locator('h1')).toContainText('Try crewRoster Demo');
     await captureStep(page, '01_demo_page');
   });
 
