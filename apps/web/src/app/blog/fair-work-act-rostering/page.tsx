@@ -37,7 +37,7 @@ export default function FairWorkBlogPost() {
           <li>Extra breaks in hot or cold environments</li>
         </ul>
         <p>
-          CrewCircle helps you track these requirements automatically based on your employees' award classification.
+          crewRoster helps you track these requirements automatically based on your employees' award classification.
         </p>
 
         <h2>Notice Requirements</h2>
@@ -61,7 +61,7 @@ export default function FairWorkBlogPost() {
           <li>Roster publications and employee acknowledgments</li>
         </ul>
         <p>
-          CrewCircle maintains these records automatically and provides 7-year retention in compliance with Australian law.
+          crewRoster maintains these records automatically and provides 7-year retention in compliance with Australian law.
         </p>
 
         <h2>Penalties for Non-Compliance</h2>
@@ -75,9 +75,9 @@ export default function FairWorkBlogPost() {
           <li>Reputational damage and employee dissatisfaction</li>
         </ul>
 
-        <h2>How CrewCircle Helps</h2>
+        <h2>How crewRoster Helps</h2>
         <p>
-          CrewCircle is designed with Australian compliance in mind:
+          crewRoster is designed with Australian compliance in mind:
         </p>
         <ul>
           <li><strong>Automatic Award Detection:</strong> Identify which modern award applies to each employee</li>

@@ -15,7 +15,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Zod validation schemas for CrewCircle",
+  "description": "Zod validation schemas for crewRoster",
   "dependencies": {
     "zod": "^4.4.3"
   },

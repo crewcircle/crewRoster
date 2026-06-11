@@ -5,11 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
 
-const DEMO_USERS = [
-  { email: 'demo-owner@crewcircle.co', password: 'Demo2026!', role: 'Owner (Maria)', color: 'orange', tenantId: '4fdcd51f-04bc-4f72-8909-3bc0f75934f1' },
-  { email: 'demo-manager@crewcircle.co', password: 'Demo2026!', role: 'Manager (Jake)', color: 'blue', tenantId: '4fdcd51f-04bc-4f72-8909-3bc0f75934f1' },
-  { email: 'demo-employee1@crewcircle.co', password: 'Demo2026!', role: 'Employee (Sarah)', color: 'green', tenantId: '4fdcd51f-04bc-4f72-8909-3bc0f75934f1' },
-  { email: 'demo-employee2@crewcircle.co', password: 'Demo2026!', role: 'Employee (Emma)', color: 'purple', tenantId: '4fdcd51f-04bc-4f72-8909-3bc0f75934f1' },
+const DEMO_USERS_BASE = [
+  { email: 'demo-owner@crewcircle.co', password: 'Demo2026!', role: 'Owner (Maria)', roleType: 'owner', color: 'orange' },
+  { email: 'demo-manager@crewcircle.co', password: 'Demo2026!', role: 'Manager (Jake)', roleType: 'manager', color: 'blue' },
+  { email: 'demo-employee1@crewcircle.co', password: 'Demo2026!', role: 'Employee (Sarah)', roleType: 'employee', color: 'green' },
+  { email: 'demo-employee2@crewcircle.co', password: 'Demo2026!', role: 'Employee (Emma)', roleType: 'employee', color: 'purple' },
 ];
 
 export default function DemoPage() {
@@ -18,6 +18,7 @@ export default function DemoPage() {
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
+  const [tenantId, setTenantId] = useState<string | null>(null);
 
   const setupDemo = async () => {
     setIsSettingUp(true);
@@ -29,6 +30,9 @@ export default function DemoPage() {
 
       if (data.success) {
         setIsReady(true);
+        if (data.tenantId) {
+          setTenantId(data.tenantId);
+        }
       } else {
         setError(data.error || 'Failed to set up demo');
       }
@@ -39,14 +43,19 @@ export default function DemoPage() {
     }
   };
 
-  const loginAsUser = async (email: string, password: string, role: string, tenantId: string) => {
+  const loginAsUser = async (email: string, password: string, _role: string) => {
+    const currentTenantId = tenantId;
+    if (!currentTenantId) {
+      setError('Demo not set up yet. Please click "Set Up Demo Organization" first.');
+      return;
+    }
     setIsLoggingIn(email);
 
     try {
       const response = await fetch('/api/demo/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role, tenantId }),
+        body: JSON.stringify({ email, role: _role, tenantId: currentTenantId }),
       });
 
       const data = await response.json();
@@ -55,7 +64,7 @@ export default function DemoPage() {
         const params = new URLSearchParams({
           token: data.token,
           email: encodeURIComponent(email),
-          role: encodeURIComponent(role),
+          role: encodeURIComponent(_role),
           tenantId: tenantId,
         });
         router.push(`/demo-login?${params.toString()}`);
@@ -80,7 +89,7 @@ export default function DemoPage() {
 
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Try CrewCircle Demo</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Try crewRoster Demo</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Explore all features with a pre-configured demo organization for 
             <span className="font-semibold text-orange-600"> The Daily Grind Cafe</span> in Sydney.
@@ -143,12 +152,14 @@ export default function DemoPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {DEMO_USERS.map((user) => (
+                {DEMO_USERS_BASE.map((user) => (
                   <button
                     key={user.email}
-                    onClick={() => loginAsUser(user.email, user.password, user.role, user.tenantId)}
-                    disabled={isLoggingIn !== null}
-                    className="p-6 border-2 border-gray-200 rounded-xl hover:border-orange-400 hover:bg-orange-50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => loginAsUser(user.email, user.password, user.roleType)}
+                    disabled={isLoggingIn !== null || !tenantId}
+                    className={`p-6 border-2 rounded-xl hover:border-orange-400 hover:bg-orange-50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
+                      tenantId ? 'border-gray-200' : 'border-gray-300 bg-gray-50'
+                    }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-full flex items-center justify-center ${

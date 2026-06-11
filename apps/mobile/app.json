@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CrewCircle",
-    "slug": "crewcircle",
+    "name": "crewRoster",
+    "slug": "crewroster",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.crewcircle.mobile"
+      "bundleIdentifier": "com.crewroster.mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png"
       },
-      "package": "com.crewcircle.mobile"
+      "package": "com.crewroster.mobile"
     },
     "web": {
       "favicon": "./assets/favicon.png"

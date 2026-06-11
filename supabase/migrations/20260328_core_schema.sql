@@ -1,4 +1,4 @@
--- CrewCircle NeonDB Schema Migration
+-- crewRoster NeonDB Schema Migration
 -- Generated: 2026-03-28
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

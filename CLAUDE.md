@@ -1,4 +1,4 @@
-# CrewCircle Development Standards
+# crewRoster Development Standards
 
 ## Code Size Limits
 
@@ -12,7 +12,7 @@ To maintain code readability and reduce cognitive overhead:
 
 ## Architecture
 
-CrewCircle uses a monorepo structure with:
+crewRoster uses a monorepo structure with:
 
 - `apps/web` - Next.js frontend application
 - `packages/` - Shared packages
@@ -21,7 +21,7 @@ CrewCircle uses a monorepo structure with:
 ## Project Structure
 
 ```
-crewcircle/
+crewroster/
 ├── apps/
 │   └── web/           # Next.js frontend
 ├── packages/          # Shared libraries

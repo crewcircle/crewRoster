@@ -1,19 +1,19 @@
 {
-  "name": "crewcircle",
+  "name": "crewroster",
   "version": "1.0.0",
-  "description": "CrewCircle - Australian workforce management solution for shift-based businesses",
+  "description": "crewRoster - Australian workforce management solution for shift-based businesses",
   "private": true,
   "author": {
     "name": "CrewCircle",
     "email": "hello@crewcircle.co",
-    "url": "https://crewcircle.co"
+    "url": "https://roster.crewcircle.co"
   },
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Sensible-Analytics/crewcircle"
+    "url": "https://github.com/Sensible-Analytics/crewroster"
   },
-  "homepage": "https://crewcircle.co",
+  "homepage": "https://roster.crewcircle.co",
   "keywords": [
     "workforce-management",
     "roster-scheduling",

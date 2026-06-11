@@ -5,16 +5,16 @@ export default function TermsOfService() {
       <p>Last Updated: March 23, 2026</p>
       
       <h2>1. Agreement to Terms</h2>
-      <p>By accessing or using CrewCircle, you agree to be bound by these Terms of Service and all applicable laws and regulations.</p>
+      <p>By accessing or using crewRoster, you agree to be bound by these Terms of Service and all applicable laws and regulations.</p>
       
       <h2>2. Subscription and Billing</h2>
-      <p>CrewCircle offers a Free tier and a Starter subscription. The Starter subscription is billed monthly at a rate of $4 AUD (plus GST) per active employee. An employee is considered "active" if their profile exists and has not been soft-deleted.</p>
+      <p>crewRoster offers a Free tier and a Starter subscription. The Starter subscription is billed monthly at a rate of $4 AUD (plus GST) per active employee. An employee is considered "active" if their profile exists and has not been soft-deleted.</p>
       
       <h2>3. Multi-Tenant Isolation</h2>
       <p>We provide multi-tenant isolation through database-level security. Each business account's data is isolated and only accessible to authorized members of that account.</p>
       
       <h2>4. Employer Responsibilities</h2>
-      <p>As an employer using CrewCircle, you are responsible for:
+      <p>As an employer using crewRoster, you are responsible for:
         <ul>
           <li>Ensuring all employee data is accurate and up to date.</li>
           <li>Complying with the Fair Work Act 2009 regarding record-keeping and awards.</li>
@@ -23,7 +23,7 @@ export default function TermsOfService() {
       </p>
       
       <h2>5. Limitation of Liability</h2>
-      <p>While we strive for 100% uptime, CrewCircle is provided "as is". We are not liable for any losses resulting from service interruptions or data entry errors.</p>
+      <p>While we strive for 100% uptime, crewRoster is provided "as is". We are not liable for any losses resulting from service interruptions or data entry errors.</p>
       
       <h2>6. Termination</h2>
       <p>You may cancel your subscription at any time via the billing settings. Upon cancellation, your account will revert to the Free tier at the end of the current billing cycle. Data is retained for 7 years in accordance with our Privacy Policy.</p>
