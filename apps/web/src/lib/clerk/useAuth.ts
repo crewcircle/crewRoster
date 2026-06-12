@@ -21,19 +21,19 @@ export const useAuth = () => {
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
   useEffect(() => {
+    const demoTenantId = sessionStorage.getItem('demo_tenant_id');
+    const demoRole = sessionStorage.getItem('demo_role');
+    const demoToken = sessionStorage.getItem('demo_token');
+
+    if (demoTenantId && demoRole && demoToken) {
+      setIsDemoMode(true);
+      setTenantId(demoTenantId);
+      setRole(demoRole as 'owner' | 'manager' | 'employee');
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchTenantInfo() {
-      const demoTenantId = sessionStorage.getItem('demo_tenant_id');
-      const demoRole = sessionStorage.getItem('demo_role');
-      const demoToken = sessionStorage.getItem('demo_token');
-
-      if (demoTenantId && demoRole && demoToken) {
-        setIsDemoMode(true);
-        setTenantId(demoTenantId);
-        setRole(demoRole as 'owner' | 'manager' | 'employee');
-        setIsLoading(false);
-        return;
-      }
-
       if (!user) {
         setTenantId(null);
         setRole(null);
