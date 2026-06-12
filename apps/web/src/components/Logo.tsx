@@ -29,11 +29,11 @@ export default function Logo({
         className="relative flex items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-600 shadow-md"
         style={{ width: iconSize, height: iconSize }}
       >
-        <span className="text-white font-bold" style={{ fontSize: iconSize * 0.5 }}>C</span>
+        <span className="text-white font-bold" style={{ fontSize: iconSize * 0.5 }}>CR</span>
       </div>
       {showText && (
         <span className={`font-bold tracking-tight ${textColor}`} style={{ fontSize: width * 0.15 }}>
-          Crew<span className="text-orange-500">Circle</span>
+          Crew<span className="text-orange-500">Roster</span>
         </span>
       )}
     </Link>
