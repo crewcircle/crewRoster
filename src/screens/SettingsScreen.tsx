@@ -14,6 +14,7 @@ import {
   DEFAULT_APP_SETTINGS,
 } from "../types/settings";
 import { createContact } from "../types/contact";
+import { colors, spacing, borderRadius, typography, touchTarget, shadows } from "../theme";
 import { showErrorAlert } from "../utils/errorHandler";
 import storageUtils from "../utils/storage";
 import { shouldDisableCameraForE2ESync } from "../utils/launchArgs";
@@ -284,68 +285,95 @@ const SettingsScreen = () => {
       </View>
 
       <View style={Styles.section} testID="ocr-settings-section">
-        <Text style={Styles.sectionTitle} testID="section-title">
-          OCR Settings
+        <View style={Styles.sectionHeader}>
+          <MaterialCommunityIcons name="text-recognition" size={20} color={colors.accent} />
+          <Text style={Styles.sectionTitle} testID="section-title">
+            OCR Languages
+          </Text>
+        </View>
+        <Text style={Styles.sectionDescription}>
+          Select languages for business card text recognition
         </Text>
-        {AVAILABLE_LANGUAGES.map((language) => (
-          <View
-            key={language}
-            style={Styles.languageRow}
-            testID={`language-row-${language}`}
-          >
+        <View style={Styles.languageGrid}>
+          {AVAILABLE_LANGUAGES.map((language) => (
             <TouchableOpacity
+              key={language}
               style={[
-                Styles.languageButton,
-                ocrLanguages.includes(language)
-                  ? Styles.selectedLanguage
-                  : null,
+                Styles.languageChip,
+                ocrLanguages.includes(language) ? Styles.languageChipSelected : null,
               ]}
               onPress={() => toggleLanguage(language)}
               testID={`language-toggle-${language}`}
+              accessibilityLabel={`${ocrLanguages.includes(language) ? "Deselect" : "Select"} ${LANGUAGE_NAMES[language] ?? language}`}
+              accessibilityRole="button"
+              accessibilityState={{ selected: ocrLanguages.includes(language) }}
             >
               <Text
-                style={Styles.languageText}
+                style={[
+                  Styles.languageChipText,
+                  ocrLanguages.includes(language) ? Styles.languageChipTextSelected : null,
+                ]}
                 testID={`language-text-${language}`}
               >
                 {LANGUAGE_NAMES[language] ?? language}
               </Text>
             </TouchableOpacity>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
 
       <View style={Styles.section} testID="general-settings-section">
-        <Text style={Styles.sectionTitle} testID="section-title">
-          General Settings
-        </Text>
-        <View style={Styles.settingRow} testID="auto-save-row">
-          <Text style={Styles.settingLabel} testID="setting-label">
-            Auto-save Contacts
+        <View style={Styles.sectionHeader}>
+          <MaterialCommunityIcons name="cog" size={20} color={colors.accent} />
+          <Text style={Styles.sectionTitle} testID="section-title">
+            General
           </Text>
+        </View>
+        <View style={Styles.settingRow} testID="auto-save-row">
+          <View style={Styles.settingTextContainer}>
+            <Text style={Styles.settingLabel} testID="setting-label">
+              Auto-save Contacts
+            </Text>
+            <Text style={Styles.settingDescription}>
+              Automatically save scanned contacts
+            </Text>
+          </View>
           <Switch
             value={autoSave}
             onValueChange={handleAutoSaveChange}
-            thumbColor={autoSave ? "#f5dd4b" : "#f4f3f4"}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={autoSave ? colors.onPrimary : colors.surface}
+            trackColor={{ false: colors.border, true: colors.accent }}
             testID="auto-save-switch"
           />
         </View>
+        <View style={Styles.settingDivider} />
         <View style={Styles.settingRow} testID="notifications-row">
-          <Text style={Styles.settingLabel} testID="setting-label">
-            Notifications
-          </Text>
+          <View style={Styles.settingTextContainer}>
+            <Text style={Styles.settingLabel} testID="setting-label">
+              Notifications
+            </Text>
+            <Text style={Styles.settingDescription}>
+              Receive alerts for contact updates
+            </Text>
+          </View>
           <Switch
             value={notificationEnabled}
             onValueChange={handleNotificationChange}
-            thumbColor={notificationEnabled ? "#f5dd4b" : "#f4f3f4"}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
+            thumbColor={notificationEnabled ? colors.onPrimary : colors.surface}
+            trackColor={{ false: colors.border, true: colors.accent }}
             testID="notifications-switch"
           />
         </View>
+        <View style={Styles.settingDivider} />
         <View style={Styles.settingRow} testID="data-usage-row">
-          <Text style={Styles.settingLabel} testID="setting-label">
-            Data Usage
-          </Text>
+          <View style={Styles.settingTextContainer}>
+            <Text style={Styles.settingLabel} testID="setting-label">
+              Data Usage
+            </Text>
+            <Text style={Styles.settingDescription}>
+              Control network usage for OCR
+            </Text>
+          </View>
           <View style={Styles.dataUsageOptions} testID="data-usage-options">
             <TouchableOpacity
               style={[
@@ -354,9 +382,23 @@ const SettingsScreen = () => {
               ]}
               onPress={() => handleDataUsageChange("wifi-only")}
               testID="wifi-only-option"
+              accessibilityLabel="Wi-Fi only"
+              accessibilityRole="button"
+              accessibilityState={{ selected: dataUsage === "wifi-only" }}
             >
-              <Text style={Styles.dataUsageText} testID="data-usage-text">
-                Wi-Fi Only
+              <MaterialCommunityIcons
+                name="wifi"
+                size={16}
+                color={dataUsage === "wifi-only" ? colors.onPrimary : colors.textSecondary}
+              />
+              <Text
+                style={[
+                  Styles.dataUsageText,
+                  dataUsage === "wifi-only" ? Styles.dataUsageTextSelected : null,
+                ]}
+                testID="data-usage-text"
+              >
+                Wi-Fi
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -366,9 +408,23 @@ const SettingsScreen = () => {
               ]}
               onPress={() => handleDataUsageChange("cellular")}
               testID="cellular-option"
+              accessibilityLabel="Cellular"
+              accessibilityRole="button"
+              accessibilityState={{ selected: dataUsage === "cellular" }}
             >
-              <Text style={Styles.dataUsageText} testID="data-usage-text">
-                Cellular
+              <MaterialCommunityIcons
+                name="signal-cellular-4-bar"
+                size={16}
+                color={dataUsage === "cellular" ? colors.onPrimary : colors.textSecondary}
+              />
+              <Text
+                style={[
+                  Styles.dataUsageText,
+                  dataUsage === "cellular" ? Styles.dataUsageTextSelected : null,
+                ]}
+                testID="data-usage-text"
+              >
+                All
               </Text>
             </TouchableOpacity>
           </View>
@@ -376,63 +432,71 @@ const SettingsScreen = () => {
       </View>
 
       <View style={Styles.section} testID="data-management-section">
-        <Text style={Styles.sectionTitle} testID="section-title">
-          Data Management
-        </Text>
+        <View style={Styles.sectionHeader}>
+          <MaterialCommunityIcons name="database" size={20} color={colors.accent} />
+          <Text style={Styles.sectionTitle} testID="section-title">
+            Data Management
+          </Text>
+        </View>
         <TouchableOpacity
-          style={Styles.button}
+          style={Styles.managementButton}
           onPress={handleExportData}
           testID="export-data-button"
+          accessibilityLabel="Export all data"
+          accessibilityRole="button"
         >
-          <MaterialCommunityIcons
-            name="content-save-all"
-            size={20}
-            color="#fff"
-          />
-          <Text style={Styles.buttonText} testID="button-text">
+          <MaterialCommunityIcons name="export" size={20} color={colors.accent} />
+          <Text style={Styles.managementButtonText} testID="button-text">
             Export Data
           </Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
         </TouchableOpacity>
+        <View style={Styles.settingDivider} />
         <TouchableOpacity
-          style={Styles.button}
+          style={Styles.managementButton}
           onPress={handleImportData}
           testID="import-data-button"
+          accessibilityLabel="Import data"
+          accessibilityRole="button"
         >
-          <MaterialCommunityIcons
-            name="content-duplicate"
-            size={20}
-            color="#fff"
-          />
-          <Text style={Styles.buttonText} testID="button-text">
+          <MaterialCommunityIcons name="import" size={20} color={colors.accent} />
+          <Text style={Styles.managementButtonText} testID="button-text">
             Import Data
           </Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
         </TouchableOpacity>
+        <View style={Styles.settingDivider} />
         <TouchableOpacity
-          style={Styles.button}
+          style={Styles.managementButton}
           onPress={handleResetApp}
           testID="reset-app-button"
+          accessibilityLabel="Reset all app data"
+          accessibilityRole="button"
         >
-          <MaterialCommunityIcons name="restart" size={20} color="#fff" />
-          <Text style={Styles.buttonText} testID="button-text">
+          <MaterialCommunityIcons name="restart" size={20} color={colors.destructive} />
+          <Text style={[Styles.managementButtonText, { color: colors.destructive }]}>
             Reset App
           </Text>
+          <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
       {__DEV__ || isE2E ? (
         <View style={Styles.section} testID="qa-tools-section">
-          <Text style={Styles.sectionTitle}>QA Tools</Text>
+          <View style={Styles.sectionHeader}>
+            <MaterialCommunityIcons name="flask" size={20} color={colors.warning} />
+            <Text style={Styles.sectionTitle}>QA Tools</Text>
+          </View>
           <TouchableOpacity
-            style={Styles.button}
+            style={Styles.managementButton}
             onPress={handleSeedSampleContacts}
             testID="qa-seed-sample-contacts-button"
+            accessibilityLabel="Load sample contacts"
+            accessibilityRole="button"
           >
-            <MaterialCommunityIcons
-              name="flask-outline"
-              size={20}
-              color="#fff"
-            />
-            <Text style={Styles.buttonText}>Load Sample Contacts</Text>
+            <MaterialCommunityIcons name="database-plus" size={20} color={colors.warning} />
+            <Text style={Styles.managementButtonText}>Load Sample Contacts</Text>
+            <MaterialCommunityIcons name="chevron-right" size={20} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -445,29 +509,38 @@ export default SettingsScreen;
 const Styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   header: {
-    padding: 16,
-    backgroundColor: "#0066cc",
-    borderBottomWidth: 1,
-    borderColor: "#eee",
+    padding: spacing.lg,
+    backgroundColor: headerColors.background,
+    ...shadows.sm,
   },
   headerTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "600",
+    color: headerColors.text,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
   },
   section: {
-    padding: 16,
-    marginBottom: 16,
-    backgroundColor: "#fff",
+    padding: spacing.lg,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.surface,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.textPrimary,
+  },
+  sectionDescription: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
   },
   loadingContainer: {
     flex: 1,
@@ -475,67 +548,98 @@ const Styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 18,
-    color: "#666",
+    fontSize: typography.fontSize.md,
+    color: colors.textSecondary,
   },
-  languageRow: {
-    marginBottom: 10,
+  languageGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
   },
-  languageButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  languageChip: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderWidth: 1,
-    borderColor: "#d0d7e2",
-    borderRadius: 8,
+    borderColor: colors.border,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.surface,
+    minHeight: touchTarget.minimum,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  selectedLanguage: {
-    backgroundColor: "#e6f0ff",
-    borderColor: "#0066cc",
+  languageChipSelected: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
   },
-  languageText: {
-    fontSize: 15,
-    color: "#333",
+  languageChipText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textPrimary,
+  },
+  languageChipTextSelected: {
+    color: colors.onPrimary,
+    fontWeight: typography.fontWeight.medium,
   },
   settingRow: {
-    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: spacing.md,
+    minHeight: touchTarget.recommended,
+  },
+  settingTextContainer: {
+    flex: 1,
+    marginRight: spacing.md,
   },
   settingLabel: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 8,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.textPrimary,
+  },
+  settingDescription: {
+    fontSize: typography.fontSize.xs,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  settingDivider: {
+    height: 1,
+    backgroundColor: colors.borderLight,
   },
   dataUsageOptions: {
     flexDirection: "row",
-    gap: 12,
+    gap: spacing.sm,
   },
   dataUsageOption: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: "#d0d7e2",
-    borderRadius: 8,
-  },
-  selectedDataUsage: {
-    backgroundColor: "#e6f0ff",
-    borderColor: "#0066cc",
-  },
-  dataUsageText: {
-    fontSize: 15,
-    color: "#333",
-  },
-  button: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 12,
-    paddingVertical: 14,
-    borderRadius: 24,
-    backgroundColor: "#0066cc",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: borderRadius.full,
+    minHeight: touchTarget.minimum,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  selectedDataUsage: {
+    backgroundColor: colors.accent,
+    borderColor: colors.accent,
+  },
+  dataUsageText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.textPrimary,
+  },
+  dataUsageTextSelected: {
+    color: colors.onPrimary,
+  },
+  managementButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    minHeight: touchTarget.recommended,
+  },
+  managementButtonText: {
+    flex: 1,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
   },
 });

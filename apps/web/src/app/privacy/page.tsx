@@ -5,13 +5,13 @@ export default function PrivacyPolicy() {
       <p>Last Updated: March 23, 2026</p>
       
       <h2>1. Introduction</h2>
-      <p>CrewCircle (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our platform.</p>
+      <p>CrewRoster (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our platform.</p>
       
       <h2>2. Australian Privacy Principles</h2>
       <p>We comply with the Australian Privacy Principles (APPs) contained in the Privacy Act 1988 (Cth). We take reasonable steps to ensure that personal information we collect is handled in a transparent and secure manner.</p>
       
       <h2>3. Data Residency</h2>
-      <p>All CrewCircle data, including personal information of employees and employers, is stored on secure servers located in **Sydney, Australia (AWS ap-southeast-2 region)**. We do not transfer your data outside of Australia.</p>
+      <p>All CrewRoster data, including personal information of employees and employers, is stored on secure servers located in **Sydney, Australia (AWS ap-southeast-2 region)**. We do not transfer your data outside of Australia.</p>
       
       <h2>4. Information We Collect</h2>
       <ul>
@@ -28,7 +28,7 @@ export default function PrivacyPolicy() {
       <p>In accordance with the Fair Work Act 2009, we retain employee and time-tracking records for a minimum of 7 years. You may request access to or correction of your personal information at any time.</p>
       
       <h2>7. Contact Us</h2>
-      <p>If you have any questions about this Privacy Policy, please contact us at support@crewcircle.com.au.</p>
+      <p>If you have any questions about this Privacy Policy, please contact us at support@crewroster.com.au.</p>
     </div>
   );
 }

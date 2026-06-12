@@ -6,6 +6,7 @@ const DEMO_USERS = [
   { email: 'demo-manager@crewcircle.co', firstName: 'Jake', lastName: 'Thompson', role: 'manager' },
   { email: 'demo-employee1@crewcircle.co', firstName: 'Sarah', lastName: 'Chen', role: 'employee' },
   { email: 'demo-employee2@crewcircle.co', firstName: 'Emma', lastName: 'Wilson', role: 'employee' },
+  { email: 'demo-pilot@crewcircle.co', firstName: 'Alex', lastName: 'Rivera', role: 'owner' },
 ];
 
 interface ShiftDef {

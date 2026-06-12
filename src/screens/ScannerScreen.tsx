@@ -18,6 +18,7 @@ import {
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Contact, createContact, hasContactDetails } from "../types/contact";
 import { DEFAULT_APP_SETTINGS } from "../types/settings";
+import { colors, spacing, borderRadius, typography, touchTarget, shadows } from "../theme";
 import { showErrorAlert } from "../utils/errorHandler";
 import { exportContactAsVCard } from "../utils/exportUtils";
 import { parseContactInfo } from "../utils/contactParser";
@@ -205,7 +206,8 @@ const ScannerScreen = () => {
 
   if (permissionStatus === "not-determined") {
     return (
-      <View style={Styles.container}>
+      <View style={[Styles.container, Styles.centeredContent]}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={Styles.permissionText}>
           Requesting camera permission...
         </Text>
@@ -216,15 +218,19 @@ const ScannerScreen = () => {
   if (permissionStatus === "denied" || permissionStatus === "restricted") {
     return (
       <View style={Styles.container}>
+        <MaterialCommunityIcons name="camera-off" size={64} color={colors.textMuted} />
         <Text style={Styles.permissionText}>
           Camera permission is required to scan business cards.
         </Text>
         <TouchableOpacity
-          style={Styles.button}
+          style={Styles.permissionButton}
           onPress={requestCameraPermission}
           testID="grant-permission-button"
+          accessibilityLabel="Grant camera permission"
+          accessibilityRole="button"
         >
-          <Text style={Styles.buttonText}>Grant Permission</Text>
+          <MaterialCommunityIcons name="camera" size={20} color={colors.onPrimary} />
+          <Text style={Styles.permissionButtonText}>Grant Permission</Text>
         </TouchableOpacity>
       </View>
     );
@@ -250,15 +256,14 @@ const ScannerScreen = () => {
             photo={true}
           />
           <View style={Styles.overlay}>
-            <MaterialCommunityIcons name="scan-helper" size={40} color="#fff" />
+            <View style={Styles.scanFrame}>
+              <MaterialCommunityIcons name="scan-helper" size={48} color={colors.onPrimary} />
+            </View>
             <Text style={Styles.instructionText}>
-              Point camera at business card and tap to capture
+              Point camera at business card
             </Text>
             <Text style={Styles.subInstructionText}>
-              OCR profile: {formatLanguageSummary(ocrLanguages)}
-            </Text>
-            <Text style={Styles.subInstructionText}>
-              Auto-save: {autoSaveEnabled ? "On" : "Off"}
+              {formatLanguageSummary(ocrLanguages)} • Auto-save {autoSaveEnabled ? "on" : "off"}
             </Text>
           </View>
           <TouchableOpacity
@@ -266,12 +271,16 @@ const ScannerScreen = () => {
             onPress={handleCapture}
             disabled={isProcessing}
             testID="capture-button"
+            accessibilityLabel="Capture business card"
+            accessibilityRole="button"
           >
-            {isProcessing ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <MaterialCommunityIcons name="camera" size={24} color="#fff" />
-            )}
+            <View style={Styles.captureButtonInner}>
+              {isProcessing ? (
+                <ActivityIndicator size="small" color={colors.onPrimary} />
+              ) : (
+                <MaterialCommunityIcons name="camera" size={28} color={colors.onPrimary} />
+              )}
+            </View>
           </TouchableOpacity>
         </View>
       ) : (
@@ -283,82 +292,114 @@ const ScannerScreen = () => {
             />
           ) : null}
 
-          <Text style={Styles.resultsTitle}>Extracted Information</Text>
+          <View style={Styles.resultsHeader}>
+            <Text style={Styles.resultsTitle}>Extracted Information</Text>
+            {isCurrentContactSaved ? (
+              <View style={Styles.savedBadge}>
+                <MaterialCommunityIcons name="check-circle" size={16} color={colors.success} />
+                <Text style={Styles.savedBadgeText}>Saved</Text>
+              </View>
+            ) : null}
+          </View>
+
           <Text style={Styles.resultsText} testID="extracted-text">
             {extractedText}
           </Text>
 
-          {isCurrentContactSaved ? (
-            <Text style={Styles.savedBanner}>Saved to contacts</Text>
-          ) : null}
-
           <View style={Styles.contactInfoContainer}>
-            <Text style={Styles.contactInfoLabel}>Name:</Text>
-            <Text style={Styles.contactInfoValue}>
-              {currentContact?.name || "Not detected"}
-            </Text>
+            <View style={Styles.contactInfoRow}>
+              <MaterialCommunityIcons name="account" size={18} color={colors.textSecondary} />
+              <View style={Styles.contactInfoTextContainer}>
+                <Text style={Styles.contactInfoLabel}>Name</Text>
+                <Text style={Styles.contactInfoValue}>
+                  {currentContact?.name || "Not detected"}
+                </Text>
+              </View>
+            </View>
 
-            <Text style={Styles.contactInfoLabel}>Email:</Text>
-            <Text style={Styles.contactInfoValue}>
-              {currentContact?.email || "Not detected"}
-            </Text>
+            <View style={Styles.contactInfoRow}>
+              <MaterialCommunityIcons name="email" size={18} color={colors.textSecondary} />
+              <View style={Styles.contactInfoTextContainer}>
+                <Text style={Styles.contactInfoLabel}>Email</Text>
+                <Text style={Styles.contactInfoValue}>
+                  {currentContact?.email || "Not detected"}
+                </Text>
+              </View>
+            </View>
 
-            <Text style={Styles.contactInfoLabel}>Phone:</Text>
-            <Text style={Styles.contactInfoValue}>
-              {currentContact?.phone || "Not detected"}
-            </Text>
+            <View style={Styles.contactInfoRow}>
+              <MaterialCommunityIcons name="phone" size={18} color={colors.textSecondary} />
+              <View style={Styles.contactInfoTextContainer}>
+                <Text style={Styles.contactInfoLabel}>Phone</Text>
+                <Text style={Styles.contactInfoValue}>
+                  {currentContact?.phone || "Not detected"}
+                </Text>
+              </View>
+            </View>
 
-            <Text style={Styles.contactInfoLabel}>Company:</Text>
-            <Text style={Styles.contactInfoValue}>
-              {currentContact?.company || "Not detected"}
-            </Text>
+            <View style={Styles.contactInfoRow}>
+              <MaterialCommunityIcons name="factory" size={18} color={colors.textSecondary} />
+              <View style={Styles.contactInfoTextContainer}>
+                <Text style={Styles.contactInfoLabel}>Company</Text>
+                <Text style={Styles.contactInfoValue}>
+                  {currentContact?.company || "Not detected"}
+                </Text>
+              </View>
+            </View>
 
-            <Text style={Styles.contactInfoLabel}>Website:</Text>
-            <Text style={Styles.contactInfoValue}>
-              {currentContact?.website || "Not detected"}
-            </Text>
+            <View style={Styles.contactInfoRow}>
+              <MaterialCommunityIcons name="web" size={18} color={colors.textSecondary} />
+              <View style={Styles.contactInfoTextContainer}>
+                <Text style={Styles.contactInfoLabel}>Website</Text>
+                <Text style={Styles.contactInfoValue}>
+                  {currentContact?.website || "Not detected"}
+                </Text>
+              </View>
+            </View>
           </View>
 
           <View style={Styles.buttonContainer}>
             <TouchableOpacity
-              style={Styles.button}
+              style={Styles.resultButton}
               onPress={resetScanState}
               testID="retake-button"
+              accessibilityLabel="Retake photo"
+              accessibilityRole="button"
             >
-              <MaterialCommunityIcons name="repeat" size={20} color="#fff" />
-              <Text style={Styles.buttonText}>Retake</Text>
+              <MaterialCommunityIcons name="repeat" size={20} color={colors.onPrimary} />
+              <Text style={Styles.resultButtonText}>Retake</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
-                Styles.button,
-                isCurrentContactSaved ? Styles.buttonDisabled : undefined,
+                Styles.resultButton,
+                isCurrentContactSaved ? Styles.resultButtonDisabled : Styles.resultButtonPrimary,
               ]}
               onPress={handleSaveContact}
               disabled={isCurrentContactSaved}
               testID="save-contact-button"
+              accessibilityLabel={isCurrentContactSaved ? "Contact already saved" : "Save contact"}
+              accessibilityRole="button"
             >
               <MaterialCommunityIcons
                 name={isCurrentContactSaved ? "check" : "content-save"}
                 size={20}
-                color="#fff"
+                color={colors.onPrimary}
               />
-              <Text style={Styles.buttonText}>
-                {isCurrentContactSaved ? "Saved" : "Save Contact"}
+              <Text style={Styles.resultButtonText}>
+                {isCurrentContactSaved ? "Saved" : "Save"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={Styles.button}
+              style={Styles.resultButton}
               onPress={handleExportContact}
               testID="export-contact-button"
+              accessibilityLabel="Export contact as VCard"
+              accessibilityRole="button"
             >
-              <MaterialCommunityIcons
-                name="share-variant"
-                size={20}
-                color="#fff"
-              />
-              <Text style={Styles.buttonText}>Export</Text>
+              <MaterialCommunityIcons name="share-variant" size={20} color={colors.onPrimary} />
+              <Text style={Styles.resultButtonText}>Export</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -370,116 +411,192 @@ const ScannerScreen = () => {
 const Styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: colors.primary,
+  },
+  centeredContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    gap: spacing.md,
   },
   cameraContainer: {
     flex: 1,
   },
   overlay: {
     position: "absolute",
-    bottom: 112,
+    bottom: 120,
     left: 0,
     right: 0,
     alignItems: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.xxl,
+  },
+  scanFrame: {
+    width: 80,
+    height: 80,
+    borderRadius: borderRadius.lg,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.md,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   instructionText: {
-    color: "#fff",
-    fontSize: 16,
-    marginTop: 8,
+    color: colors.onPrimary,
+    fontSize: typography.fontSize.lg,
+    fontWeight: typography.fontWeight.medium,
+    marginTop: spacing.sm,
     textAlign: "center",
   },
   subInstructionText: {
-    color: "#d9e7ff",
-    fontSize: 13,
-    marginTop: 4,
+    color: "rgba(255, 255, 255, 0.7)",
+    fontSize: typography.fontSize.sm,
+    marginTop: spacing.xs,
     textAlign: "center",
   },
   captureButton: {
     position: "absolute",
-    bottom: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#0066cc",
+    bottom: 24,
+    alignSelf: "center",
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "center",
+    borderWidth: 3,
+    borderColor: colors.onPrimary,
+  },
+  captureButtonInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.accent,
+    alignItems: "center",
+    justifyContent: "center",
   },
   permissionText: {
     textAlign: "center",
-    marginTop: 40,
-    color: "#fff",
-    fontSize: 18,
-    paddingHorizontal: 20,
+    marginTop: spacing.xxl,
+    color: colors.onPrimary,
+    fontSize: typography.fontSize.lg,
+    paddingHorizontal: spacing.xxxl,
+    lineHeight: typography.fontSize.lg * typography.lineHeight.normal,
   },
-  button: {
-    marginVertical: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "#0066cc",
-    borderRadius: 25,
+  permissionButton: {
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 100,
+    gap: spacing.sm,
+    marginTop: spacing.xxl,
+    marginHorizontal: spacing.xxxl,
+    paddingHorizontal: spacing.xxl,
+    paddingVertical: spacing.lg,
+    backgroundColor: colors.accent,
+    borderRadius: borderRadius.xl,
+    minHeight: touchTarget.recommended,
   },
-  buttonDisabled: {
-    backgroundColor: "#5f8cbf",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  permissionButtonText: {
+    color: colors.onPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
   resultsContainer: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: colors.background,
+    padding: spacing.lg,
   },
   capturedImage: {
     width: "100%",
-    height: 300,
-    marginBottom: 20,
+    height: 200,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.lg,
+  },
+  resultsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.md,
   },
   resultsTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 10,
-    color: "#333",
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.textPrimary,
+  },
+  savedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors.successLight,
+    borderRadius: borderRadius.full,
+  },
+  savedBadgeText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.success,
   },
   resultsText: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-  },
-  savedBanner: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1b6f3a",
-    marginBottom: 16,
+    fontSize: typography.fontSize.sm,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.muted,
+    borderRadius: borderRadius.md,
+    lineHeight: typography.fontSize.sm * typography.lineHeight.relaxed,
   },
   contactInfoContainer: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    ...shadows.sm,
+  },
+  contactInfoRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
+  contactInfoTextContainer: {
+    flex: 1,
   },
   contactInfoLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.textMuted,
+    marginBottom: 2,
   },
   contactInfoValue: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 12,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
+    fontWeight: typography.fontWeight.medium,
   },
   buttonContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    flexWrap: "wrap",
-    gap: 12,
+    gap: spacing.sm,
+  },
+  resultButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.secondary,
+    minHeight: touchTarget.recommended,
+  },
+  resultButtonPrimary: {
+    backgroundColor: colors.accent,
+  },
+  resultButtonDisabled: {
+    backgroundColor: colors.success,
+  },
+  resultButtonText: {
+    color: colors.onPrimary,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
   },
 });
 

@@ -13,6 +13,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { ContactsStackParamList } from "../navigation/types";
 import { Contact } from "../types/contact";
+import { colors, spacing, borderRadius, typography, touchTarget, headerColors, shadows } from "../theme";
 import { showErrorAlert } from "../utils/errorHandler";
 import storageUtils from "../utils/storage";
 
@@ -133,6 +134,9 @@ const EditContactScreen = ({ route, navigation }: Props) => {
   if (loading || !contact) {
     return (
       <KeyboardAvoidingView behavior="padding" style={Styles.container}>
+        <View style={Styles.header}>
+          <Text style={Styles.headerTitle}>Edit Contact</Text>
+        </View>
         <View style={Styles.loadingContainer}>
           <Text style={Styles.loadingText}>Loading contact...</Text>
         </View>
@@ -151,8 +155,10 @@ const EditContactScreen = ({ route, navigation }: Props) => {
           style={Styles.backButton}
           onPress={() => navigation.goBack()}
           testID="back-button"
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
         >
-          <MaterialCommunityIcons name="arrow-left" size={24} color="#fff" />
+          <MaterialCommunityIcons name="arrow-left" size={24} color={headerColors.text} />
         </TouchableOpacity>
         <Text style={Styles.headerTitle} testID="header-title">
           Edit Contact
@@ -262,11 +268,13 @@ const EditContactScreen = ({ route, navigation }: Props) => {
             style={Styles.button}
             onPress={handleSaveContact}
             testID="save-button"
+            accessibilityLabel="Save contact changes"
+            accessibilityRole="button"
           >
             <MaterialCommunityIcons
               name="content-save"
               size={20}
-              color="#fff"
+              color={colors.onPrimary}
             />
             <Text style={Styles.buttonText}>Save Changes</Text>
           </TouchableOpacity>
@@ -275,8 +283,10 @@ const EditContactScreen = ({ route, navigation }: Props) => {
             style={Styles.buttonDelete}
             onPress={handleDeleteContact}
             testID="delete-button"
+            accessibilityLabel="Delete this contact"
+            accessibilityRole="button"
           >
-            <MaterialCommunityIcons name="delete" size={20} color="#fff" />
+            <MaterialCommunityIcons name="delete" size={20} color={colors.onPrimary} />
             <Text style={Styles.buttonText}>Delete Contact</Text>
           </TouchableOpacity>
         </View>
@@ -290,25 +300,29 @@ export default EditContactScreen;
 const Styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16,
-    backgroundColor: "#0066cc",
+    padding: spacing.lg,
+    backgroundColor: headerColors.background,
+    ...shadows.sm,
   },
   backButton: {
-    padding: 4,
+    minWidth: touchTarget.minimum,
+    minHeight: touchTarget.minimum,
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#fff",
+    color: headerColors.text,
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.semibold,
   },
   headerSpacer: {
-    width: 24,
+    width: touchTarget.minimum,
   },
   loadingContainer: {
     flex: 1,
@@ -316,63 +330,69 @@ const Styles = StyleSheet.create({
     alignItems: "center",
   },
   loadingText: {
-    fontSize: 18,
-    color: "#666",
+    fontSize: typography.fontSize.md,
+    color: colors.textSecondary,
   },
   formContainer: {
-    padding: 16,
-    paddingBottom: 32,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxxl,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   inputLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 8,
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    color: "#333",
+    borderColor: colors.border,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    fontSize: typography.fontSize.md,
+    color: colors.textPrimary,
+    backgroundColor: colors.surface,
+    minHeight: touchTarget.minimum,
   },
   metaGroup: {
-    marginBottom: 20,
+    marginBottom: spacing.xl,
+    paddingTop: spacing.sm,
   },
   metaText: {
-    fontSize: 13,
-    color: "#666",
-    marginBottom: 4,
+    fontSize: typography.fontSize.xs,
+    color: colors.textMuted,
+    marginBottom: spacing.xs,
   },
   buttonContainer: {
-    gap: 12,
+    gap: spacing.md,
+    marginTop: spacing.lg,
   },
   button: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 24,
-    backgroundColor: "#0066cc",
+    gap: spacing.sm,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.accent,
+    minHeight: touchTarget.recommended,
   },
   buttonDelete: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 24,
-    backgroundColor: "#d64545",
+    gap: spacing.sm,
+    paddingVertical: spacing.lg,
+    borderRadius: borderRadius.xl,
+    backgroundColor: colors.destructive,
+    minHeight: touchTarget.recommended,
   },
   buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+    color: colors.onPrimary,
+    fontSize: typography.fontSize.md,
+    fontWeight: typography.fontWeight.semibold,
   },
 });

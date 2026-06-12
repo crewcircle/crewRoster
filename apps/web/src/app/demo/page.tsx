@@ -1,24 +1,79 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
 
-const DEMO_USERS_BASE = [
-  { email: 'demo-owner@crewcircle.co', password: 'Demo2026!', role: 'Owner (Maria)', roleType: 'owner', color: 'orange' },
-  { email: 'demo-manager@crewcircle.co', password: 'Demo2026!', role: 'Manager (Jake)', roleType: 'manager', color: 'blue' },
-  { email: 'demo-employee1@crewcircle.co', password: 'Demo2026!', role: 'Employee (Sarah)', roleType: 'employee', color: 'green' },
-  { email: 'demo-employee2@crewcircle.co', password: 'Demo2026!', role: 'Employee (Emma)', roleType: 'employee', color: 'purple' },
+const DEMO_PERSONAS = [
+  {
+    email: 'demo-owner@crewcircle.co',
+    password: 'Demo2026!',
+    role: 'Owner',
+    roleType: 'owner',
+    name: 'Maria',
+    color: 'orange',
+    emoji: '👩‍💼',
+    description: 'See the full picture — build rosters, track hours, manage your team from your laptop.',
+    features: ['Build & publish rosters', 'Track team hours', 'Export timesheets', 'Manage roles & settings'],
+  },
+  {
+    email: 'demo-manager@crewcircle.co',
+    password: 'Demo2026!',
+    role: 'Manager',
+    roleType: 'manager',
+    name: 'Jake',
+    color: 'blue',
+    emoji: '👨‍🍳',
+    description: 'Keep things running smoothly — adjust shifts and see what\'s happening on the floor.',
+    features: ['View team roster', 'Adjust shifts', 'See clock-in times', 'Coordinate coverage'],
+  },
+  {
+    email: 'demo-employee1@crewcircle.co',
+    password: 'Demo2026!',
+    role: 'Staff',
+    roleType: 'employee',
+    name: 'Sarah',
+    color: 'green',
+    emoji: '☕',
+    description: 'Know exactly when you\'re on — check your shifts and clock in from your phone.',
+    features: ['View your shifts', 'Clock in/out', 'Request availability', 'Get notified'],
+  },
+  {
+    email: 'demo-employee2@crewcircle.co',
+    password: 'Demo2026!',
+    role: 'Staff',
+    roleType: 'employee',
+    name: 'Emma',
+    color: 'purple',
+    emoji: '🍽️',
+    description: 'Simple, clear shifts — open the app and you know exactly when you work this week.',
+    features: ['View your shifts', 'Clock in/out', 'Request availability', 'Get notified'],
+  },
+  {
+    email: 'demo-pilot@crewcircle.co',
+    password: 'Demo2026!',
+    role: 'Pilot',
+    roleType: 'pilot',
+    name: 'Alex',
+    color: 'amber',
+    emoji: '🚀',
+    description: 'Everything unlocked — try every feature like a power user with full admin access.',
+    features: ['Full admin access', 'All features unlocked', 'Team management', 'Reports & analytics'],
+  },
 ];
 
 export default function DemoPage() {
   const router = useRouter();
-  const [isSettingUp, setIsSettingUp] = useState(false);
+  const [isSettingUp, setIsSettingUp] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setupDemo();
+  }, []);
 
   const setupDemo = async () => {
     setIsSettingUp(true);
@@ -46,7 +101,7 @@ export default function DemoPage() {
   const loginAsUser = async (email: string, password: string, _role: string) => {
     const currentTenantId = tenantId;
     if (!currentTenantId) {
-      setError('Demo not set up yet. Please click "Set Up Demo Organization" first.');
+      setError('Demo not set up yet. Please try again.');
       return;
     }
     setIsLoggingIn(email);
@@ -65,7 +120,7 @@ export default function DemoPage() {
           token: data.token,
           email: encodeURIComponent(email),
           role: encodeURIComponent(_role),
-          tenantId: tenantId,
+          tenantId: currentTenantId,
         });
         router.push(`/demo-login?${params.toString()}`);
       } else {
@@ -91,52 +146,34 @@ export default function DemoPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Try crewRoster Demo</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Explore all features with a pre-configured demo organization for 
-            <span className="font-semibold text-orange-600"> The Daily Grind Cafe</span> in Sydney.
+            Pick a persona and explore how crewRoster works for{' '}
+            <span className="font-semibold text-orange-600">The Daily Grind Cafe</span> in Sydney.
           </p>
         </div>
 
-        {!isReady ? (
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 text-center">
-            <div className="mb-6">
-              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-10 h-10 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">The Daily Grind Cafe</h2>
-              <p className="text-gray-600">A fictional cafe in Surry Hills, Sydney with 4 team members</p>
+        {isSettingUp && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12 text-center">
+            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="animate-spin h-10 w-10 text-orange-600" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
             </div>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm text-red-600">{error}</p>
-              </div>
-            )}
-
-            <button
-              onClick={setupDemo}
-              disabled={isSettingUp}
-              className="px-8 py-4 bg-orange-500 text-white rounded-xl text-lg font-bold hover:bg-orange-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSettingUp ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Setting up demo...
-                </span>
-              ) : (
-                'Set Up Demo Organization'
-              )}
-            </button>
-
-            <p className="mt-4 text-sm text-gray-500">
-              This will create a demo cafe with 4 users, rosters, shifts, and clock events
-            </p>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Setting up your demo...</h2>
+            <p className="text-gray-600">Creating The Daily Grind Cafe with 4 team members</p>
           </div>
-        ) : (
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+            <button onClick={setupDemo} className="mt-2 text-sm text-red-700 font-medium underline">
+              Try again
+            </button>
+          </div>
+        )}
+
+        {isReady && !isSettingUp && (
           <div className="space-y-8">
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
               <div className="flex items-center gap-3 mb-6">
@@ -146,55 +183,48 @@ export default function DemoPage() {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Demo Ready!</h2>
-                  <p className="text-gray-600">Click any user below to explore their view</p>
+                  <h2 className="text-xl font-bold text-gray-900">Choose your persona</h2>
+                  <p className="text-gray-600">Each one sees crewRoster differently — pick who you want to be</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {DEMO_USERS_BASE.map((user) => (
+                {DEMO_PERSONAS.map((persona) => (
                   <button
-                    key={user.email}
-                    onClick={() => loginAsUser(user.email, user.password, user.roleType)}
+                    key={persona.email}
+                    onClick={() => loginAsUser(persona.email, persona.password, persona.roleType)}
                     disabled={isLoggingIn !== null || !tenantId}
                     className={`p-6 border-2 rounded-xl hover:border-orange-400 hover:bg-orange-50 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed ${
                       tenantId ? 'border-gray-200' : 'border-gray-300 bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                        user.color === 'orange' ? 'bg-orange-100' :
-                        user.color === 'blue' ? 'bg-blue-100' :
-                        user.color === 'green' ? 'bg-green-100' : 'bg-purple-100'
-                      }`}>
-                        <span className={`text-xl font-bold ${
-                          user.color === 'orange' ? 'text-orange-600' :
-                          user.color === 'blue' ? 'text-blue-600' :
-                          user.color === 'green' ? 'text-green-600' : 'text-purple-600'
-                        }`}>
-                          {user.role.split(' ')[1]?.[0] || user.role[0]}
-                        </span>
-                      </div>
+                    <div className="flex items-start gap-4">
+                      <div className="text-3xl">{persona.emoji}</div>
                       <div className="flex-1">
-                        <p className="font-bold text-gray-900">{user.role}</p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
-                        {isLoggingIn === user.email && (
-                          <p className="text-xs text-orange-600 mt-1">Signing in...</p>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-bold text-gray-900">{persona.name}</p>
+                          <span className={`px-2 py-0.5 text-xs rounded-full ${
+                            persona.color === 'orange' ? 'bg-orange-100 text-orange-700' :
+                            persona.color === 'blue' ? 'bg-blue-100 text-blue-700' :
+                            persona.color === 'green' ? 'bg-green-100 text-green-700' :
+                            persona.color === 'purple' ? 'bg-purple-100 text-purple-700' :
+                            'bg-amber-100 text-amber-700'
+                          }`}>
+                            {persona.role}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">{persona.description}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {persona.features.map((feature) => (
+                            <span key={feature} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
+                        {isLoggingIn === persona.email && (
+                          <p className="text-xs text-orange-600 mt-2 font-medium">Signing in...</p>
                         )}
                       </div>
-                    </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        user.role.startsWith('Owner') ? 'bg-orange-100 text-orange-700' :
-                        user.role.startsWith('Manager') ? 'bg-blue-100 text-blue-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {user.role.split(' ')[0]}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        Full access to {user.role.startsWith('Owner') ? 'all features' : 
-                          user.role.startsWith('Manager') ? 'scheduling & team' : 'their own shifts'}
-                      </span>
                     </div>
                   </button>
                 ))}
@@ -202,27 +232,27 @@ export default function DemoPage() {
 
               <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
                 <p className="text-sm text-amber-800">
-                  <span className="font-semibold">💡 Demo Mode:</span> You're exploring as a {isLoggingIn ? 'logging in...' : 'selected user'}. 
-                  All actions are simulated - no real data is affected.
+                  <span className="font-semibold">💡 Demo Mode:</span> All actions are simulated — no real data is affected. 
+                  Feel free to explore everything!
                 </p>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">What's included in the demo:</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">What&apos;s inside The Daily Grind Cafe:</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 mt-1">✓</span>
                   <div>
                     <p className="font-semibold text-gray-900">4 team members</p>
-                    <p className="text-sm text-gray-600">Owner, Manager, and 2 Employees with different roles</p>
+                    <p className="text-sm text-gray-600">Owner, Manager, and 2 Staff with different roles</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="text-green-500 mt-1">✓</span>
                   <div>
-                    <p className="font-semibold text-gray-900">Sydney location</p>
-                    <p className="text-sm text-gray-600">Surry Hills cafe with GPS geofencing enabled</p>
+                    <p className="font-semibold text-gray-900">Surry Hills, Sydney</p>
+                    <p className="text-sm text-gray-600">GPS geofencing enabled for clock-in</p>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
@@ -237,13 +267,6 @@ export default function DemoPage() {
                   <div>
                     <p className="font-semibold text-gray-900">Clock events</p>
                     <p className="text-sm text-gray-600">Sample clock-in records for today (if weekday)</p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-green-500 mt-1">✓</span>
-                  <div>
-                    <p className="font-semibold text-gray-900">Employee availability</p>
-                    <p className="text-sm text-gray-600">Availability records for all team members</p>
                   </div>
                 </li>
               </ul>

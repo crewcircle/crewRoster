@@ -6,6 +6,7 @@ const DEMO_EMAILS = [
   'demo-manager@crewcircle.co',
   'demo-employee1@crewcircle.co',
   'demo-employee2@crewcircle.co',
+  'demo-pilot@crewcircle.co',
 ];
 
 export async function POST(request: NextRequest) {
