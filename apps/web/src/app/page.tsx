@@ -114,26 +114,160 @@ export default function LandingPage() {
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium mb-4">See it in action</span>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Roster your week in minutes</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto text-lg">Watch how easy it is to create a roster, send it to your team, and track their hours.</p>
+            <p className="text-gray-600 max-w-2xl mx-auto text-lg">Drag shifts, publish with one click, track hours from your phone.</p>
           </div>
           
-          {/* Video Demo - See It In Action */}
-          <div className="max-w-4xl mx-auto">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-gray-200 bg-gray-900">
-              {/* Video player with custom controls */}
-              <video
-                className="w-full h-auto"
-                controls
-                controlsList="nodownload"
-                poster="/og-image.svg"
-                preload="metadata"
-              >
-                <source src="/crew-roster-demo.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+              <div className="bg-gray-100 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <span className="text-xs text-gray-500 ml-2">roster.crewcircle.co/roster</span>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold text-gray-900">Weekly Roster</h4>
+                  <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Published</span>
+                </div>
+                <div className="grid grid-cols-7 gap-1 mb-3">
+                  {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
+                    <div key={d} className="text-xs text-center text-gray-400 font-medium">{d}</div>
+                  ))}
+                  {Array.from({ length: 7 }).map((_, i) => (
+                    <div key={i} className={`h-16 rounded-lg ${i < 5 ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50 border border-gray-100'}`}>
+                      {i < 5 && (
+                        <div className="p-1 space-y-0.5">
+                          <div className="h-2 bg-orange-400 rounded text-[6px] text-white text-center leading-2">M</div>
+                          <div className="h-2 bg-blue-400 rounded text-[6px] text-white text-center leading-2">J</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm text-gray-500 text-center">Drag & drop shifts across the week</p>
+              </div>
             </div>
-            <p className="text-center text-gray-500 mt-4 text-sm">Watch how crewRoster makes rostering simple — drag & drop shifts, publish instantly, track hours with GPS clock-in</p>
+
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+              <div className="bg-gray-900 mx-auto mt-4 w-48 rounded-3xl p-2 shadow-lg">
+                <div className="bg-white rounded-2xl overflow-hidden">
+                  <div className="bg-orange-500 text-white text-xs text-center py-1 font-medium">crewRoster</div>
+                  <div className="p-4 text-center">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <span className="text-2xl">📍</span>
+                    </div>
+                    <p className="font-bold text-gray-900 text-sm">Good morning, Sarah!</p>
+                    <p className="text-xs text-gray-500 mb-4">Your shift starts at 8:00 AM</p>
+                    <div className="bg-green-500 text-white font-bold py-3 rounded-xl text-sm mb-3">
+                      ⏰ Clock In
+                    </div>
+                    <div className="flex items-center justify-center gap-1 text-xs text-green-600">
+                      <span>✓</span>
+                      <span>On-site at Surry Hills</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 text-center mt-4 mb-2">GPS-verified clock in from phone</p>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+              <div className="bg-gray-100 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <span className="text-xs text-gray-500 ml-2">roster.crewcircle.co/team</span>
+              </div>
+              <div className="p-6">
+                <h4 className="font-bold text-gray-900 mb-4">Team Members</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                    <div className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-bold">👩‍💼</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">Maria Papadopoulos</p>
+                      <p className="text-xs text-gray-500">Owner · Mon-Fri</p>
+                    </div>
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Owner</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="w-10 h-10 bg-blue-400 rounded-full flex items-center justify-center text-white font-bold">👨‍🍳</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">Jake Thompson</p>
+                      <p className="text-xs text-gray-500">Manager · Mon-Fri</p>
+                    </div>
+                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Manager</span>
+                  </div>
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <div className="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center text-white font-bold">☕</div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">Sarah Chen</p>
+                      <p className="text-xs text-gray-500">Barista · Mon, Wed, Fri</p>
+                    </div>
+                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Staff</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-200 bg-white">
+              <div className="bg-gray-100 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <span className="text-xs text-gray-500 ml-2">roster.crewcircle.co/timesheets</span>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="font-bold text-gray-900">Timesheet Summary</h4>
+                  <button className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg font-medium">📤 Export CSV</button>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-orange-400 rounded-full"></div>
+                      <span className="text-sm text-gray-700">Maria</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-gray-900">40.0h</span>
+                      <span className="text-xs text-gray-500 ml-1">$880</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-blue-400 rounded-full"></div>
+                      <span className="text-sm text-gray-700">Jake</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-gray-900">40.0h</span>
+                      <span className="text-xs text-gray-500 ml-1">$760</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 bg-green-400 rounded-full"></div>
+                      <span className="text-sm text-gray-700">Sarah</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-bold text-gray-900">24.0h</span>
+                      <span className="text-xs text-gray-500 ml-1">$480</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-gray-200 flex justify-between">
+                  <span className="text-sm font-bold text-gray-900">Total</span>
+                  <span className="text-sm font-bold text-orange-600">104.0h · $2,120</span>
+                </div>
+              </div>
+            </div>
           </div>
+          <p className="text-center text-gray-500 mt-6 text-sm">All actions are simulated in the live demo — try it yourself!</p>
         </div>
       </section>
 
@@ -679,8 +813,6 @@ export default function LandingPage() {
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><a href="https://github.com/Sensible-Analytics/crewroster/wiki" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Documentation</a></li>
-                <li><a href="https://github.com/Sensible-Analytics/crewroster" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Open Source</a></li>
               </ul>
             </div>
           </div>

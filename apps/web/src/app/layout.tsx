@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     'employee management',
     'shift planning',
   ],
-  authors: [{ name: 'CrewCircle', url: 'https://crewcircle.co' }],
-  creator: 'CrewCircle',
-  publisher: 'CrewCircle',
+  authors: [{ name: 'CrewRoster', url: 'https://roster.crewcircle.co' }],
+  creator: 'CrewRoster',
+  publisher: 'CrewRoster',
   openGraph: {
     type: 'website',
     locale: 'en_AU',

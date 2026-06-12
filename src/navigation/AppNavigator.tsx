@@ -7,6 +7,7 @@ import ContactsScreen from "../screens/ContactsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import EditContactScreen from "../screens/EditContactScreen";
 import { ContactsStackParamList, RootTabParamList } from "./types";
+import { colors } from "../theme";
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 const ContactsStack = createNativeStackNavigator<ContactsStackParamList>();
@@ -37,8 +38,8 @@ export const AppNavigator = () => {
     <Tab.Navigator
       initialRouteName="Scan"
       screenOptions={{
-        tabBarActiveTintColor: "#0066cc",
-        tabBarInactiveTintColor: "#666666",
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textMuted,
       }}
     >
       <Tab.Screen
