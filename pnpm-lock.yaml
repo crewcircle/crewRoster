@@ -88,8 +88,8 @@ importers:
         specifier: ^55.0.15
         version: 55.0.15(expo@55.0.23)(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
       expo-status-bar:
-        specifier: ~55.0.6
-        version: 55.0.6(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
+        specifier: ~56.0.4
+        version: 56.0.4(expo@55.0.23)(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
       expo-task-manager:
         specifier: ^55.0.15
         version: 55.0.15(expo@55.0.23)(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))
@@ -3160,9 +3160,10 @@ packages:
       react: '*'
       react-native: '*'
 
-  expo-status-bar@55.0.6:
-    resolution: {integrity: sha512-ijOUptfdiqYt7rObZ6jrPQ8sE5YN/8MxKCIJx0b7TY4nGkSJxhPIxeoW4GXcXCA8mTQ9PiOHH/ThLZgRVZvUlQ==}
+  expo-status-bar@56.0.4:
+    resolution: {integrity: sha512-IGs/fDfkHXofy2ZQrGiXayhFK04HB85FZXorhcEhDZEcqASKgSqpak+HwUtAaR0MeTJwWyHNF7I6VmVbbp8EcA==}
     peerDependencies:
+      expo: '*'
       react: '*'
       react-native: '*'
 
@@ -8564,11 +8565,11 @@ snapshots:
       react: 19.2.7
       react-native: 0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7)
 
-  expo-status-bar@55.0.6(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7):
+  expo-status-bar@56.0.4(expo@55.0.23)(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7):
     dependencies:
+      expo: 55.0.23(@babel/core@7.29.0)(@expo/dom-webview@55.0.3)(@expo/metro-runtime@55.0.7)(expo-router@55.0.14)(react-dom@19.2.7(react@19.2.7))(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
       react: 19.2.7
       react-native: 0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7)
-      react-native-is-edge-to-edge: 1.3.1(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7)
 
   expo-symbols@55.0.8(expo-font@55.0.7)(expo@55.0.23)(react-native@0.85.3(@babel/core@7.29.0)(@types/react@19.2.17)(react@19.2.7))(react@19.2.7):
     dependencies:
