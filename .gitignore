@@ -79,6 +79,14 @@ Pods/
 # Superseded by React Native 0.65
 /.expo/
 
+# Build outputs
+.next/
+out/
+
+# Test artifacts
+playwright-report/
+test-results/
+
 # Additional files to ignore
 .sisyphus/
 .superset/

@@ -71,10 +71,6 @@ export default function DemoPage() {
   const [isLoggingIn, setIsLoggingIn] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
 
-  useEffect(() => {
-    setupDemo();
-  }, []);
-
   const setupDemo = async () => {
     setIsSettingUp(true);
     setError(null);
@@ -91,12 +87,38 @@ export default function DemoPage() {
       } else {
         setError(data.error || 'Failed to set up demo');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to set up demo. Please try again.');
     } finally {
       setIsSettingUp(false);
     }
   };
+
+  useEffect(() => {
+    async function setup() {
+      setIsSettingUp(true);
+      setError(null);
+
+      try {
+        const response = await fetch('/api/demo', { method: 'POST' });
+        const data = await response.json();
+
+        if (data.success) {
+          setIsReady(true);
+          if (data.tenantId) {
+            setTenantId(data.tenantId);
+          }
+        } else {
+          setError(data.error || 'Failed to set up demo');
+        }
+      } catch {
+        setError('Failed to set up demo. Please try again.');
+      } finally {
+        setIsSettingUp(false);
+      }
+    }
+    setup();
+  }, []);
 
   const loginAsUser = async (email: string, password: string, _role: string) => {
     const currentTenantId = tenantId;

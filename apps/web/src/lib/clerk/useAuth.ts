@@ -12,32 +12,35 @@ export interface AuthContext {
   updatePassword: (password: string) => Promise<void>;
 }
 
+function readDemoSession(): { tenantId: string; role: 'owner' | 'manager' | 'employee' } | null {
+  if (typeof window === 'undefined') return null;
+  const tenantId = sessionStorage.getItem('demo_tenant_id');
+  const role = sessionStorage.getItem('demo_role');
+  const token = sessionStorage.getItem('demo_token');
+  if (tenantId && role && token) {
+    return { tenantId, role: role as 'owner' | 'manager' | 'employee' };
+  }
+  return null;
+}
+
 export const useAuth = () => {
   const { user, isLoaded: isUserLoaded } = useUser();
   const { signOut: clerkSignOut } = useClerk();
-  const [tenantId, setTenantId] = useState<string | null>(null);
-  const [role, setRole] = useState<'owner' | 'manager' | 'employee' | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
+
+  const [demoSession] = useState(readDemoSession);
+  const isDemoMode = !!demoSession;
+
+  const [tenantId, setTenantId] = useState<string | null>(demoSession?.tenantId ?? null);
+  const [role, setRole] = useState<'owner' | 'manager' | 'employee' | null>(demoSession?.role ?? null);
+  const [isLoading, setIsLoading] = useState<boolean>(!isDemoMode);
 
   useEffect(() => {
-    const demoTenantId = sessionStorage.getItem('demo_tenant_id');
-    const demoRole = sessionStorage.getItem('demo_role');
-    const demoToken = sessionStorage.getItem('demo_token');
-
-    if (demoTenantId && demoRole && demoToken) {
-      setIsDemoMode(true);
-      setTenantId(demoTenantId);
-      setRole(demoRole as 'owner' | 'manager' | 'employee');
-      setIsLoading(false);
-      return;
-    }
+    if (isDemoMode) return;
 
     async function fetchTenantInfo() {
       if (!user) {
         setTenantId(null);
         setRole(null);
-        setIsDemoMode(false);
         setIsLoading(false);
         return;
       }
@@ -66,14 +69,13 @@ export const useAuth = () => {
           setRole(publicMetadata.role as 'owner' | 'manager' | 'employee');
         }
       }
-      setIsDemoMode(false);
       setIsLoading(false);
     }
 
     if (isUserLoaded) {
       fetchTenantInfo();
     }
-  }, [user, isUserLoaded]);
+  }, [user, isUserLoaded, isDemoMode]);
 
   const signOut = async () => {
     if (isDemoMode) {
