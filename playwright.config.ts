@@ -13,7 +13,7 @@ export default defineConfig({
     ["html", { outputFolder: "playwright-report" }],
   ],
   use: {
-    baseURL: process.env.TEST_BASE_URL || "https://crewcircle.co",
+    baseURL: process.env.TEST_BASE_URL || "https://roster.crewcircle.co",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
