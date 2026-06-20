@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { Profile } from '@/types/profile';
-import { Shift } from '@/types/shift';
+import type { Profile } from '@/types/profile';
+import type { Shift } from '@/types/shift';
+import * as rosterApi from '@/api/rosterApi';
 
 export type RosterStatus = 'draft' | 'published' | 'archived';
 
@@ -44,20 +45,23 @@ interface RosterState {
   fetchCurrentRoster: (tenantId: string, weekStart: string) => Promise<void>;
 }
 
+function getMonday(): string {
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+}
+
 export const useRosterStore = create<RosterState>()(
   immer((set, get) => ({
     profiles: [],
     shifts: [],
     roster: null,
-    selectedWeekStart: (() => {
-      const today = new Date();
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-      return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
-    })(),
+    selectedWeekStart: getMonday(),
     loading: true,
     operationError: null,
     isOperating: false,
+
     setProfiles: (profiles) => set({ profiles }),
     setShifts: (shifts) => set({ shifts }),
     setRoster: (roster) => set({ roster }),
@@ -65,6 +69,7 @@ export const useRosterStore = create<RosterState>()(
     setLoading: (loading) => set({ loading }),
     setOperationError: (error) => set({ operationError: error }),
     setIsOperating: (isOperating) => set({ isOperating }),
+
     addProfile: (profile) =>
       set((state) => {
         state.profiles.push(profile);
@@ -95,28 +100,23 @@ export const useRosterStore = create<RosterState>()(
       set((state) => {
         state.shifts = state.shifts.filter((s) => s.id !== id);
       }),
+
     publishRoster: async () => {
       const { roster } = get();
       if (!roster) {
         set({ operationError: 'No roster selected' });
         return false;
       }
-
       set({ isOperating: true, operationError: null });
-      
       try {
-        const response = await fetch('/api/roster', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'publish', rosterId: roster.id }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to publish roster');
+        const { roster: updated } = await rosterApi.publishRoster(roster.id);
+        if (updated) {
+          set({ roster: { ...roster, ...updated } });
+        } else {
+          set({
+            roster: { ...roster, status: 'published' as const, published_at: new Date().toISOString() },
+          });
         }
-
-        set({ roster: { ...roster, status: 'published', published_at: new Date().toISOString() } });
         return true;
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -126,28 +126,19 @@ export const useRosterStore = create<RosterState>()(
         set({ isOperating: false });
       }
     },
+
     unpublishRoster: async () => {
       const { roster } = get();
       if (!roster) {
         set({ operationError: 'No roster selected' });
         return false;
       }
-
       set({ isOperating: true, operationError: null });
-      
       try {
-        const response = await fetch('/api/roster', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'unpublish', rosterId: roster.id }),
+        await rosterApi.unpublishRoster(roster.id);
+        set({
+          roster: { ...roster, status: 'draft' as const, published_at: null, published_by: null },
         });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to unpublish roster');
-        }
-
-        set({ roster: { ...roster, status: 'draft', published_at: null, published_by: null } });
         return true;
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -157,34 +148,21 @@ export const useRosterStore = create<RosterState>()(
         set({ isOperating: false });
       }
     },
+
     copyForwardRoster: async () => {
       const { roster } = get();
       if (!roster || roster.status !== 'published') {
         set({ operationError: 'Can only copy forward from a published roster' });
         return false;
       }
-
       set({ isOperating: true, operationError: null });
-      
       try {
-        const response = await fetch('/api/roster', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'copy-forward',
-            tenantId: roster.tenant_id,
-            weekStart: roster.week_start,
-            rosterId: roster.id,
-          }),
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to copy forward');
-        }
-
-        const data = await response.json();
-        set({ roster: data.roster as Roster });
+        const result = await rosterApi.copyForwardRoster(
+          roster.tenant_id,
+          roster.week_start,
+          roster.id
+        );
+        set({ roster: result.roster });
         return true;
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -194,28 +172,16 @@ export const useRosterStore = create<RosterState>()(
         set({ isOperating: false });
       }
     },
+
     fetchCurrentRoster: async (tenantId: string, weekStart: string) => {
+      set({ loading: true });
       try {
-        set({ loading: true });
-        
-        const response = await fetch(`/api/roster?tenantId=${tenantId}&weekStart=${weekStart}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error('Failed to fetch roster:', data.error);
-          set({ loading: false });
-          return;
-        }
-
-        set({ 
-          roster: data.roster as Roster | null, 
-          shifts: data.shifts as Shift[], 
-          loading: false 
-        });
+        const result = await rosterApi.fetchCurrentRoster(tenantId, weekStart);
+        set({ roster: result.roster, shifts: result.shifts, loading: false });
       } catch (error) {
         console.error('Failed to fetch roster:', error);
         set({ loading: false });
       }
-    }
+    },
   }))
 );
