@@ -28,14 +28,15 @@ vi.mock('zustand', async () => {
   return {
     ...actual,
     create: vi.fn((fn) => {
-      let state = fn((partial) => { state = { ...state, ...partial }; }, () => state, undefined);
+      let state: Record<string, unknown> = {};
+      state = fn((partial: Record<string, unknown>) => { state = { ...state, ...partial }; }, () => state, undefined);
       return () => state;
     }),
   };
 });
 
 vi.mock('zustand/middleware/immer', () => ({
-  immer: (fn: any) => fn,
+  immer: (fn: (set: (partial: unknown) => void, get: () => unknown, api: unknown) => unknown) => fn,
 }));
 
 vi.mock('date-fns', () => ({

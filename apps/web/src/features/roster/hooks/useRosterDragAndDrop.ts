@@ -26,8 +26,8 @@ interface UseRosterDragAndDropReturn {
   handleDragStart: (event: DragStartEvent) => void;
   handleDragOver: (event: DragOverEvent) => void;
   handleDragEnd: (event: DragEndEvent) => void;
-  pointerSensor: ReturnType<typeof useSensor>;
-  keyboardSensor: ReturnType<typeof useSensor>;
+  pointerSensor: any;
+  keyboardSensor: any;
 }
 
 export function useRosterDragAndDrop({
@@ -59,6 +59,7 @@ export function useRosterDragAndDrop({
 
   const handleDragOver = useCallback((_event: DragOverEvent) => {
     // handled in dragEnd
+    void _event;
   }, []);
 
   const handleDragEnd = useCallback(

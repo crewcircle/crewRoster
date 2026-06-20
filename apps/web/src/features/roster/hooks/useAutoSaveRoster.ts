@@ -5,7 +5,7 @@ import * as rosterApi from '@/api/rosterApi';
 interface UseAutoSaveRosterOptions {
   rosterId: string | undefined;
   shifts: Shift[];
-  tenantId: string | undefined;
+  tenantId: string | null;
   user: unknown;
   authLoading: boolean;
   isSaving: boolean;
@@ -23,7 +23,7 @@ export function useAutoSaveRoster({
   isDemoMode,
   setIsSaving,
 }: UseAutoSaveRosterOptions): void {
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (authLoading || isDemoMode || !user || !tenantId) return;
@@ -34,12 +34,14 @@ export function useAutoSaveRoster({
         setIsSaving(true);
         await rosterApi.saveShifts({
           action: 'save-shifts',
-          shifts: shifts.map((s) => ({
-            id: s.id,
-            profile_id: s.profile_id,
-            start_time: s.start_time,
-            end_time: s.end_time,
-          })),
+          shifts: shifts
+            .filter((s) => s.id)
+            .map((s) => ({
+              id: s.id!,
+              profile_id: s.profile_id,
+              start_time: s.start_time,
+              end_time: s.end_time,
+            })),
         });
       } catch (error) {
         console.error('Failed to save roster:', error);
@@ -51,7 +53,7 @@ export function useAutoSaveRoster({
     saveTimeoutRef.current = setTimeout(saveRoster, 5000);
 
     return () => {
-      clearTimeout(saveTimeoutRef.current);
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     };
   }, [shifts, rosterId, tenantId, user, authLoading, isDemoMode, isSaving, setIsSaving]);
 }

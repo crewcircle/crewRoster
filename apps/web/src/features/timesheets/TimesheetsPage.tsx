@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback } from 'react';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { useCallback } from 'react';
+import { format } from 'date-fns';
 import { useTimesheets } from './hooks/useTimesheets';
 import { useTimesheetActions } from './hooks/useTimesheetActions';
 import { TimesheetTable } from './components/TimesheetTable';

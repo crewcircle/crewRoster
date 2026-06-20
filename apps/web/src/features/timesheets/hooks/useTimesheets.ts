@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { startOfWeek, endOfWeek } from 'date-fns';
 import { useAuth } from '@/lib/clerk/useAuth';
 
 export interface TimesheetEntry {
@@ -31,7 +31,7 @@ interface UseTimesheetsResult {
 }
 
 export function useTimesheets(): UseTimesheetsResult {
-  const { tenantId, authLoading } = useAuth();
+  const { tenantId, isLoading: authLoading } = useAuth();
   const [entries, setEntries] = useState<TimesheetEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dateRange, setDateRange] = useState({
@@ -65,7 +65,11 @@ export function useTimesheets(): UseTimesheetsResult {
   }, [tenantId, dateRange, authLoading]);
 
   useEffect(() => {
-    fetchEntries();
+    let mounted = true;
+    fetchEntries().finally(() => {
+      if (!mounted) return;
+    });
+    return () => { mounted = false; };
   }, [fetchEntries]);
 
   const groupedEntries = useMemo(() => {
