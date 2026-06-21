@@ -1,4 +1,4 @@
-import { ShiftValues } from '@/lib/validators/shift';
+import { ShiftValues } from '@packages/validators/shift';
 
 // Extend the ShiftValues type with additional properties used in the frontend
 export interface Shift extends ShiftValues {

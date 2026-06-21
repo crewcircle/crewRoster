@@ -12,8 +12,3 @@ export async function sql(strings: TemplateStringsArray, ...values: unknown[]) {
   const sqlFn = getSql();
   return sqlFn(strings, ...values);
 }
-
-export async function query<T = unknown>(strings: TemplateStringsArray, ...values: unknown[]) {
-  const result = await getSql()(strings, ...values);
-  return result as T[];
-}
