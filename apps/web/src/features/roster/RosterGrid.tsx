@@ -23,7 +23,7 @@ import { useRosterStore } from '@/store/rosterStore';
 import { Shift } from '@/types/shift';
 import { Profile } from '@/types/profile';
 import { Roster } from '@/store/rosterStore';
-import { Availability } from '@/lib/validators/conflicts';
+import { Availability, detectConflicts } from '@packages/validators';
 
 interface ShiftFormData {
   employeeId: string;
@@ -32,10 +32,10 @@ interface ShiftFormData {
   roleLabel: string;
   notes: string;
 }
-import { useAuth } from '@/lib/clerk/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { shiftSchema } from '@/lib/validators/shift';
-import { detectConflicts } from '@/lib/validators/conflicts';
+// detectConflicts imported from @packages/validators above
 import { format } from 'date-fns';
 import { useRosterRealtime } from './hooks/useRosterRealtime';
 

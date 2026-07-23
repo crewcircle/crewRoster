@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon/client';
+import { createClient } from '@/lib/supabase/server';
 
+// ---------------------------------------------------------------------------
+// GET  — fetch roster + shifts for a tenant/week
+// ---------------------------------------------------------------------------
 export async function GET(request: NextRequest) {
   try {
+    const client = await createClient();
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get('tenantId');
     const weekStart = searchParams.get('weekStart');
@@ -11,219 +15,260 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'tenantId and weekStart required' }, { status: 400 });
     }
 
-    const rosters = await sql`
-      SELECT * FROM rosters 
-      WHERE tenant_id = ${tenantId} 
-      AND week_start = ${weekStart}
-      AND deleted_at IS NULL
-      ORDER BY created_at DESC
-      LIMIT 1
-    `;
+    // Find or create roster
+    const { data: rosters } = await client
+      .from('rosters')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('week_start', weekStart)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(1);
 
-    let roster = rosters.length > 0 ? rosters[0] : null;
+    let roster = rosters && rosters.length > 0 ? rosters[0] : null;
 
     if (!roster) {
-      const locations = await sql`
-        SELECT id FROM locations 
-        WHERE tenant_id = ${tenantId} 
-        AND deleted_at IS NULL 
-        LIMIT 1
-      `;
+      const { data: locations } = await client
+        .from('locations')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .is('deleted_at', null)
+        .limit(1);
 
-      if (locations.length === 0) {
+      if (!locations || locations.length === 0) {
         return NextResponse.json({ error: 'No location found for tenant' }, { status: 404 });
       }
 
       const locationId = locations[0].id;
-      const newRosters = await sql`
-        INSERT INTO rosters (tenant_id, location_id, week_start, status)
-        VALUES (${tenantId}, ${locationId}, ${weekStart}, 'draft')
-        RETURNING *
-      `;
+      const { data: newRosters } = await client
+        .from('rosters')
+        .insert({ tenant_id: tenantId, location_id: locationId, week_start: weekStart, status: 'draft' })
+        .select('*');
 
-      roster = newRosters.length > 0 ? newRosters[0] : null;
+      roster = newRosters && newRosters.length > 0 ? newRosters[0] : null;
     }
 
     if (!roster) {
       return NextResponse.json({ error: 'Failed to create roster' }, { status: 500 });
     }
 
-    const shifts = await sql`
-      SELECT * FROM shifts 
-      WHERE roster_id = ${roster.id} 
-      AND deleted_at IS NULL
-    `;
+    const { data: shifts } = await client
+      .from('shifts')
+      .select('*')
+      .eq('roster_id', roster.id)
+      .is('deleted_at', null);
 
-    return NextResponse.json({ roster, shifts });
+    return NextResponse.json({ roster, shifts: shifts ?? [] });
   } catch (error) {
     console.error('Failed to fetch roster:', error);
     return NextResponse.json({ error: 'Failed to fetch roster' }, { status: 500 });
   }
 }
 
+// ---------------------------------------------------------------------------
+// POST — publish / unpublish / copy-forward / save-shifts / update-shift / create-shift
+// ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
+    const client = await createClient();
     const body = await request.json();
     const { action, tenantId, weekStart, rosterId, shifts } = body;
 
     switch (action) {
+      // -- publish ----------------------------------------------------------
       case 'publish': {
-        await sql`
-          UPDATE rosters 
-          SET status = 'published', 
-              published_at = ${new Date().toISOString()},
-              published_by = 'system'
-          WHERE id = ${rosterId}
-        `;
+        await client
+          .from('rosters')
+          .update({
+            status: 'published',
+            published_at: new Date().toISOString(),
+            published_by: 'system',
+          })
+          .eq('id', rosterId);
         return NextResponse.json({ success: true });
       }
 
+      // -- unpublish --------------------------------------------------------
       case 'unpublish': {
-        await sql`
-          UPDATE rosters 
-          SET status = 'draft', 
-              published_at = NULL,
-              published_by = NULL
-          WHERE id = ${rosterId}
-        `;
+        await client
+          .from('rosters')
+          .update({ status: 'draft', published_at: null, published_by: null })
+          .eq('id', rosterId);
         return NextResponse.json({ success: true });
       }
 
+      // -- copy-forward -----------------------------------------------------
       case 'copy-forward': {
         const currentWeekStart = new Date(weekStart);
         const newWeekStart = new Date(currentWeekStart);
         newWeekStart.setDate(currentWeekStart.getDate() + 7);
         const newWeekStartStr = newWeekStart.toISOString().split('T')[0];
 
-        const existingRosters = await sql`
-          SELECT * FROM rosters 
-          WHERE tenant_id = ${tenantId} 
-          AND week_start = ${newWeekStartStr}
-          AND deleted_at IS NULL
-        `;
+        const { data: existingRosters } = await client
+          .from('rosters')
+          .select('*')
+          .eq('tenant_id', tenantId)
+          .eq('week_start', newWeekStartStr)
+          .is('deleted_at', null);
 
-        if (existingRosters.length > 0) {
+        if (existingRosters && existingRosters.length > 0) {
           return NextResponse.json({ success: true, roster: existingRosters[0] });
         }
 
-        const roster = await sql`SELECT * FROM rosters WHERE id = ${rosterId}`;
-        if (roster.length === 0) {
+        const { data: sourceRoster } = await client
+          .from('rosters')
+          .select('*')
+          .eq('id', rosterId)
+          .single();
+
+        if (!sourceRoster) {
           return NextResponse.json({ error: 'Roster not found' }, { status: 404 });
         }
 
-        const newRosters = await sql`
-          INSERT INTO rosters (tenant_id, location_id, week_start, status)
-          VALUES (${tenantId}, ${roster[0].location_id}, ${newWeekStartStr}, 'draft')
-          RETURNING *
-        `;
+        const { data: newRosters } = await client
+          .from('rosters')
+          .insert({
+            tenant_id: tenantId,
+            location_id: sourceRoster.location_id,
+            week_start: newWeekStartStr,
+            status: 'draft',
+          })
+          .select('*');
 
-        if (newRosters.length === 0) {
+        if (!newRosters || newRosters.length === 0) {
           return NextResponse.json({ error: 'Failed to create new roster' }, { status: 500 });
         }
 
         const newRoster = newRosters[0];
-        const sourceShifts = await sql`
-          SELECT * FROM shifts 
-          WHERE roster_id = ${rosterId} 
-          AND deleted_at IS NULL
-        `;
+        const { data: sourceShifts } = await client
+          .from('shifts')
+          .select('*')
+          .eq('roster_id', rosterId)
+          .is('deleted_at', null);
 
-        for (const shift of sourceShifts) {
-          const startTime = new Date(shift.start_time);
-          const endTime = new Date(shift.end_time);
-          startTime.setDate(startTime.getDate() + 7);
-          endTime.setDate(endTime.getDate() + 7);
+        if (sourceShifts) {
+          for (const shift of sourceShifts) {
+            const startTime = new Date(shift.start_time);
+            const endTime = new Date(shift.end_time);
+            startTime.setDate(startTime.getDate() + 7);
+            endTime.setDate(endTime.getDate() + 7);
 
-          await sql`
-            INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
-            VALUES (
-              ${shift.tenant_id},
-              ${roster[0].location_id},
-              ${newRoster.id},
-              ${shift.profile_id},
-              ${startTime.toISOString()},
-              ${endTime.toISOString()},
-              ${shift.role_label},
-              ${shift.notes}
-            )
-          `;
+            await client.from('shifts').insert({
+              tenant_id: shift.tenant_id,
+              location_id: sourceRoster.location_id,
+              roster_id: newRoster.id,
+              profile_id: shift.profile_id,
+              start_time: startTime.toISOString(),
+              end_time: endTime.toISOString(),
+              role_label: shift.role_label,
+              notes: shift.notes,
+            });
+          }
         }
 
         return NextResponse.json({ success: true, roster: newRoster });
       }
 
+      // -- save-shifts ------------------------------------------------------
       case 'save-shifts': {
         if (!rosterId || !shifts) {
           return NextResponse.json({ error: 'rosterId and shifts required' }, { status: 400 });
         }
 
-        const roster = await sql`SELECT location_id FROM rosters WHERE id = ${rosterId}`;
-        if (roster.length === 0) {
+        const { data: roster } = await client
+          .from('rosters')
+          .select('location_id')
+          .eq('id', rosterId)
+          .single();
+
+        if (!roster) {
           return NextResponse.json({ error: 'Roster not found' }, { status: 404 });
         }
-        const locationId = roster[0].location_id;
+        const locationId = roster.location_id;
 
-        await sql`DELETE FROM shifts WHERE roster_id = ${rosterId}`;
+        // Soft-delete: mark removed shifts, upsert current
+        const currentShiftIds = shifts
+          .filter((s: Record<string, unknown>) => s.id)
+          .map((s: Record<string, unknown>) => s.id);
+
+        const softDeleteQuery = client
+          .from('shifts')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('roster_id', rosterId);
+
+        if (currentShiftIds.length > 0) {
+          await softDeleteQuery.not('id', 'in', `(${currentShiftIds.join(',')})`);
+        } else {
+          // All shifts removed — soft-delete everything for this roster
+          await softDeleteQuery;
+        }
 
         for (const shift of shifts) {
-          await sql`
-            INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
-            VALUES (
-              ${tenantId},
-              ${locationId},
-              ${rosterId},
-              ${shift.profile_id},
-              ${shift.start_time},
-              ${shift.end_time},
-              ${shift.role_label || null},
-              ${shift.notes || null}
-            )
-          `;
+          await client.from('shifts').upsert(
+            {
+              id: shift.id || undefined,
+              tenant_id: tenantId,
+              location_id: locationId,
+              roster_id: rosterId,
+              profile_id: shift.profile_id,
+              start_time: shift.start_time,
+              end_time: shift.end_time,
+              role_label: shift.role_label || null,
+              notes: shift.notes || null,
+              deleted_at: null,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' },
+          );
         }
 
         return NextResponse.json({ success: true });
       }
 
+      // -- update-shift -----------------------------------------------------
       case 'update-shift': {
         const { shiftId, profileId, startTime, endTime } = body;
-        await sql`
-          UPDATE shifts 
-          SET 
-            profile_id = ${profileId},
-            start_time = ${startTime},
-            end_time = ${endTime}
-          WHERE id = ${shiftId}
-        `;
+        await client
+          .from('shifts')
+          .update({
+            profile_id: profileId,
+            start_time: startTime,
+            end_time: endTime,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', shiftId);
         return NextResponse.json({ success: true });
       }
 
+      // -- create-shift -----------------------------------------------------
       case 'create-shift': {
         const { profileId, startTime, endTime, roleLabel, notes } = body;
 
         let locationId: string | null = null;
         if (rosterId) {
-          const roster = await sql`SELECT location_id FROM rosters WHERE id = ${rosterId}`;
-          if (roster.length > 0) {
-            locationId = roster[0].location_id;
-          }
+          const { data: r } = await client
+            .from('rosters')
+            .select('location_id')
+            .eq('id', rosterId)
+            .single();
+          if (r) locationId = r.location_id;
         }
 
-        const newShifts = await sql`
-          INSERT INTO shifts (tenant_id, location_id, roster_id, profile_id, start_time, end_time, role_label, notes)
-          VALUES (
-            ${tenantId},
-            ${locationId},
-            ${rosterId || null},
-            ${profileId},
-            ${startTime},
-            ${endTime},
-            ${roleLabel || null},
-            ${notes || null}
-          )
-          RETURNING *
-        `;
+        const { data: newShifts } = await client
+          .from('shifts')
+          .insert({
+            tenant_id: tenantId,
+            location_id: locationId,
+            roster_id: rosterId || null,
+            profile_id: profileId,
+            start_time: startTime,
+            end_time: endTime,
+            role_label: roleLabel || null,
+            notes: notes || null,
+          })
+          .select('*');
 
-        if (newShifts.length === 0) {
+        if (!newShifts || newShifts.length === 0) {
           return NextResponse.json({ error: 'Failed to create shift' }, { status: 500 });
         }
 

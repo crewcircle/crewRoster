@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { startOfWeek, endOfWeek } from 'date-fns';
-import { useAuth } from '@/lib/clerk/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface TimesheetEntry {
   profile_id: string;

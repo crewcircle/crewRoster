@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/clerk/useAuth';
-import { sql } from '@/lib/neon/client';
+import { useAuth } from '@/hooks/useAuth';
+import { createClient } from '@/lib/supabase/client';
 
 interface Tenant {
   id: string;
@@ -27,20 +27,24 @@ export default function BillingPage() {
       
       setIsLoading(true);
       try {
-        const tenantData = await sql`
-          SELECT id, name, plan, abn FROM tenants WHERE id = ${tenantId}
-        `;
-        
-        if (tenantData.length > 0) {
+        const supabase = createClient();
+
+        const { data: tenantData } = await supabase
+          .from('tenants')
+          .select('id, name, plan, abn')
+          .eq('id', tenantId);
+
+        if (tenantData && tenantData.length > 0) {
           setTenant(tenantData[0] as Tenant);
         }
 
-        const count = await sql`
-          SELECT COUNT(*) as count FROM profiles 
-          WHERE tenant_id = ${tenantId} AND deleted_at IS NULL
-        `;
-        
-        setEmployeeCount(Number(count[0]?.count) || 0);
+        const { count } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', tenantId)
+          .is('deleted_at', null);
+
+        setEmployeeCount(count || 0);
       } catch (error) {
         console.error('Error fetching billing data:', error);
       } finally {
@@ -81,9 +85,11 @@ export default function BillingPage() {
 
     setAbnError('');
     
-    await sql`
-      UPDATE tenants SET abn = ${abnInput.replace(/\s/g, '')} WHERE id = ${tenant!.id}
-    `;
+    const supabase = createClient();
+    await supabase
+      .from('tenants')
+      .update({ abn: abnInput.replace(/\s/g, '') })
+      .eq('id', tenant!.id);
 
     setTenant({ ...tenant!, abn: abnInput });
     setShowAbnModal(false);
@@ -97,7 +103,7 @@ export default function BillingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenantId: tenant!.id,
-          email: user?.emailAddresses?.[0]?.emailAddress,
+          email: user?.email,
         }),
       });
       const { url } = await response.json();

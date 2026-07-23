@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from 'date-fns';
-import { useAuth } from '@/lib/clerk/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import type { TimesheetEntry } from './useTimesheets';
 
 export function useTimesheetActions(

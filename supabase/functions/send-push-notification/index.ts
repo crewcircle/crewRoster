@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
     const { data: tokens, error: tokenError } = await supabase
       .from("push_tokens")
       .select("expo_push_token, profile_id")
+      .is("deleted_at", null)
       .in("profile_id", profileIds);
 
     if (tokenError) {
@@ -79,7 +80,7 @@ Deno.serve(async (req) => {
     if (invalidTokens.length > 0) {
       await supabase
         .from("push_tokens")
-        .delete()
+        .update({ deleted_at: new Date().toISOString() })
         .in("expo_push_token", invalidTokens);
     }
 
