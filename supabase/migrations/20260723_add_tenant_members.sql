@@ -149,3 +149,10 @@ CREATE TRIGGER on_auth_user_invited
   FOR EACH ROW
   WHEN (NEW.raw_user_meta_data->>'tenant_id' IS NOT NULL)
   EXECUTE FUNCTION public.handle_invited_user();
+
+-- ---------------------------------------------------------------------------
+-- Realtime support: REPLICA IDENTITY FULL for tables that need change events
+-- ---------------------------------------------------------------------------
+ALTER TABLE shifts REPLICA IDENTITY FULL;
+ALTER TABLE rosters REPLICA IDENTITY FULL;
+ALTER TABLE clock_events REPLICA IDENTITY FULL;

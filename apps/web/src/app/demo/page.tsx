@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
 import Logo from '@/components/Logo';
 
 const DEMO_PERSONAS = [
@@ -129,27 +130,33 @@ export default function DemoPage() {
     setIsLoggingIn(email);
 
     try {
-      const response = await fetch('/api/demo/login', {
+      // First, notify the demo login API to create/ensure the Supabase user
+      await fetch('/api/demo/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, role: _role, tenantId: currentTenantId }),
       });
 
-      const data = await response.json();
+      // Sign in with Supabase Auth using the demo credentials
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'crewcircle-demo-2026',
+      });
 
-      if (data.success && data.token) {
-        const params = new URLSearchParams({
-          token: data.token,
-          email: encodeURIComponent(email),
-          role: encodeURIComponent(_role),
-          tenantId: currentTenantId,
-        });
-        router.push(`/demo-login?${params.toString()}`);
-      } else {
-        setError(data.error || 'Failed to sign in. Please try again.');
+      if (signInError) {
+        setError('Failed to sign in: ' + signInError.message);
         setIsLoggingIn(null);
+        return;
       }
-    } catch (err) {
+
+      // Store demo context in sessionStorage for useAuth hook
+      sessionStorage.setItem('demo_mode', 'true');
+      sessionStorage.setItem('demo_tenantId', currentTenantId);
+      sessionStorage.setItem('demo_role', _role);
+
+      router.push('/roster');
+    } catch {
       setError('Failed to sign in. Please try again.');
       setIsLoggingIn(null);
     }

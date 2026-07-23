@@ -229,7 +229,7 @@ const RosterGrid: React.FC = () => {
       .catch(console.error);
   }, [tenantId, selectedWeekStart, authLoading, fetchCurrentRoster, setProfiles]);
 
-  useRosterRealtime();
+  useRosterRealtime(tenantId);
   
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dragOverlay, setDragOverlay] = useState<React.ReactNode | null>(null);
