@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/neon/client';
+import { requireAuth } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
+    const { user, client } = await requireAuth();
     const body = await request.json();
     const { profileId, workDate, tenantId } = body;
 
@@ -11,26 +11,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    let userId = 'demo-user';
+    // Resolve userId — demo mode or real auth
+    let userId = user.id;
     const isDemoMode = tenantId?.startsWith('demo-');
-    if (!isDemoMode) {
-      const { userId: clerkUserId } = await auth();
-      if (!clerkUserId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      userId = clerkUserId;
+    if (isDemoMode) {
+      userId = 'demo-user';
     }
 
-    await sql`
-      UPDATE clock_events
-      SET approved_at = ${new Date().toISOString()},
-          approved_by = ${userId}
-      WHERE profile_id = ${profileId}
-        AND DATE(recorded_at AT TIME ZONE 'Australia/Melbourne') = ${workDate}
-        AND type = 'clock_in'
-        AND approved_at IS NULL
-        AND deleted_at IS NULL
-    `;
+    // Update clock_events for the given profile + date
+    const { error } = await client
+      .from('clock_events')
+      .update({
+        approved_at: new Date().toISOString(),
+        approved_by: userId,
+      })
+      .eq('profile_id', profileId)
+      .eq('type', 'clock_in')
+      .is('approved_at', null)
+      .is('deleted_at', null)
+      .gte('recorded_at', `${workDate}T00:00:00.000Z`)
+      .lt('recorded_at', `${workDate}T23:59:59.999Z`);
+
+    if (error) {
+      console.error('Approve error:', error);
+      return NextResponse.json({ error: 'Failed to approve timesheets' }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

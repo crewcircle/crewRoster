@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./shift": "./src/shift.ts",
     "./conflicts": "./src/conflicts.ts",
+    "./database": "./src/database.types.ts",
     "./index": "./src/index.ts"
   },
   "scripts": {

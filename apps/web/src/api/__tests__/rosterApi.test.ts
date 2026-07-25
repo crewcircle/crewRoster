@@ -7,17 +7,17 @@ describe('rosterApi', () => {
   });
 
   describe('fetchCurrentRoster', () => {
-    it('calls GET /api/roster with tenantId and weekStart', async () => {
+    it('calls GET /api/roster with weekStart', async () => {
       const mockResponse = { roster: { id: 'r1' }, shifts: [] };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await rosterApi.fetchCurrentRoster('tenant-1', '2026-01-01');
+      const result = await rosterApi.fetchCurrentRoster('2026-01-01');
 
       expect(global.fetch).toHaveBeenCalledWith(
-        '/api/roster?tenantId=tenant-1&weekStart=2026-01-01'
+        '/api/roster?weekStart=2026-01-01'
       );
       expect(result).toEqual(mockResponse);
     });
@@ -28,7 +28,7 @@ describe('rosterApi', () => {
         json: () => Promise.resolve({ error: 'Not found' }),
       });
 
-      await expect(rosterApi.fetchCurrentRoster('tenant-1', '2026-01-01'))
+      await expect(rosterApi.fetchCurrentRoster('2026-01-01'))
         .rejects.toThrow('Not found');
     });
   });
@@ -94,14 +94,13 @@ describe('rosterApi', () => {
         json: () => Promise.resolve(mockResponse),
       });
 
-      const result = await rosterApi.copyForwardRoster('tenant-1', '2026-01-01', 'roster-1');
+      const result = await rosterApi.copyForwardRoster('2026-01-01', 'roster-1');
 
       expect(global.fetch).toHaveBeenCalledWith('/api/roster', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'copy-forward',
-          tenantId: 'tenant-1',
           weekStart: '2026-01-01',
           rosterId: 'roster-1',
         }),
@@ -198,7 +197,7 @@ describe('rosterApi', () => {
     it('throws on network error', async () => {
       global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
 
-      await expect(rosterApi.fetchCurrentRoster('tenant-1', '2026-01-01'))
+      await expect(rosterApi.fetchCurrentRoster('2026-01-01'))
         .rejects.toThrow('Network error');
     });
 

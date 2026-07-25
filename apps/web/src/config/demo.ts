@@ -8,7 +8,7 @@ export const demoConfig = {
   // Demo tenant ID - pre-created in database via migration
   tenantId: process.env.NEXT_PUBLIC_DEMO_TENANT_ID || '4fdcd51f-04bc-4f72-8909-3bc0f75934f1',
 
-  // Demo users - must exist in Clerk AND have profiles in database
+  // Demo users - must exist in Supabase Auth AND have profiles in database
   users: [
     {
       email: 'demo-owner@crewcircle.co',

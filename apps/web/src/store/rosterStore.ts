@@ -42,7 +42,7 @@ interface RosterState {
   publishRoster: () => Promise<boolean>;
   unpublishRoster: () => Promise<boolean>;
   copyForwardRoster: () => Promise<boolean>;
-  fetchCurrentRoster: (tenantId: string, weekStart: string) => Promise<void>;
+  fetchCurrentRoster: (weekStart: string) => Promise<void>;
 }
 
 function getMonday(): string {
@@ -158,7 +158,6 @@ export const useRosterStore = create<RosterState>()(
       set({ isOperating: true, operationError: null });
       try {
         const result = await rosterApi.copyForwardRoster(
-          roster.tenant_id,
           roster.week_start,
           roster.id
         );
@@ -173,10 +172,10 @@ export const useRosterStore = create<RosterState>()(
       }
     },
 
-    fetchCurrentRoster: async (tenantId: string, weekStart: string) => {
+    fetchCurrentRoster: async (weekStart: string) => {
       set({ loading: true });
       try {
-        const result = await rosterApi.fetchCurrentRoster(tenantId, weekStart);
+        const result = await rosterApi.fetchCurrentRoster(weekStart);
         set({ roster: result.roster, shifts: result.shifts, loading: false });
       } catch (error) {
         console.error('Failed to fetch roster:', error);

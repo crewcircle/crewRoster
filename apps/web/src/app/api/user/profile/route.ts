@@ -1,37 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { sql } from '@/lib/neon/client';
+import { NextResponse } from 'next/server';
+import { requireAuth } from '@/lib/supabase/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { userId } = await auth();
-    const { searchParams } = new URL(request.url);
-    const targetUserId = searchParams.get('userId');
+    const { user, client } = await requireAuth();
 
-    const queryUserId = targetUserId || userId;
+    const { data: profile, error } = await client
+      .from('profiles')
+      .select('tenant_id, role')
+      .eq('id', user.id)
+      .single();
 
-    if (!queryUserId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const profiles = await sql`
-      SELECT tenant_id, role 
-      FROM profiles 
-      WHERE id = ${queryUserId}
-    `;
-
-    if (profiles.length === 0) {
-      return NextResponse.json({ 
-        tenantId: null, 
-        role: null 
+    if (error || !profile) {
+      return NextResponse.json({
+        tenantId: null,
+        role: null,
       });
     }
 
     return NextResponse.json({
-      tenantId: profiles[0].tenant_id,
-      role: profiles[0].role,
+      tenantId: profile.tenant_id,
+      role: profile.role,
     });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error fetching user profile:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

@@ -1,16 +1,45 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { useRosterStore } from '@/store/rosterStore';
 
-/**
- * Hook to refresh roster data periodically.
- * NOTE: Currently disabled — direct sql calls fail in browser.
- * Roster data is fetched via API routes instead.
- */
-export const useRosterRealtime = () => {
-  const { roster } = useRosterStore();
+export function useRosterRealtime(tenantId: string | null) {
+  const roster = useRosterStore((s) => s.roster);
+  const selectedWeekStart = useRosterStore((s) => s.selectedWeekStart);
+  const fetchCurrentRoster = useRosterStore((s) => s.fetchCurrentRoster);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!roster?.id) return;
-    // TODO: Implement realtime refresh via API endpoint instead of direct sql
-  }, [roster?.id]);
-};
+    if (!roster?.id || !tenantId) return;
+
+    const supabase = createClient();
+
+    // Supabase Realtime: subscribe to shift changes for this roster
+    const channel = supabase
+      .channel(`roster-${roster.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'shifts', filter: `roster_id=eq.${roster.id}` },
+        () => {
+          fetchCurrentRoster(selectedWeekStart);
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [roster?.id, tenantId, selectedWeekStart, fetchCurrentRoster]);
+
+  // Fallback polling (30s) — keeps data fresh even if realtime is unavailable
+  useEffect(() => {
+    if (!roster?.id || !tenantId) return;
+
+    pollRef.current = setInterval(() => {
+      fetchCurrentRoster(selectedWeekStart);
+    }, 30_000);
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [roster?.id, tenantId, selectedWeekStart, fetchCurrentRoster]);
+}

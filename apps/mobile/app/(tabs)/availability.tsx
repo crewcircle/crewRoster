@@ -36,6 +36,20 @@ export default function AvailabilityScreen() {
   };
 
   const toggleAvailability = async (dayIndex: number) => {
+    if (!user) return;
+
+    // Look up tenant_id from user's profile
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('tenant_id')
+      .eq('id', user.id)
+      .single();
+
+    if (!profileData?.tenant_id) {
+      console.error('Could not determine tenant_id for availability insert');
+      return;
+    }
+
     const existing = availabilities.find(a => a.day_of_week === dayIndex);
     
     if (existing) {
@@ -58,7 +72,7 @@ export default function AvailabilityScreen() {
 
       const { data, error } = await supabase
         .from('availability')
-        .insert({ ...newAvailability, profile_id: user?.id })
+        .insert({ ...newAvailability, profile_id: user.id, tenant_id: profileData.tenant_id })
         .select();
 
       if (!error && data) {

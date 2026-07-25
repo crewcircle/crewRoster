@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useUser } from '@clerk/nextjs';
 import { updatePasswordSchema } from '@/lib/validators/auth';
 
 export default function UpdatePasswordPage() {
-  const { isLoaded } = useUser();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);

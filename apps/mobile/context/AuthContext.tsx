@@ -74,10 +74,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const registerPushToken = async (token: string) => {
     try {
+      if (!session?.user?.id) return;
+
+      // Look up tenant_id from profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('tenant_id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.tenant_id) {
+        console.error('Could not find tenant_id for push token registration');
+        return;
+      }
+
       const { data: existingToken, error: fetchError } = await supabase
         .from('push_tokens')
         .select('id')
-        .eq('profile_id', session?.user?.id)
+        .eq('profile_id', session.user.id)
+        .is('deleted_at', null)
         .single();
 
       if (fetchError && fetchError.code !== 'PGRST116') {
@@ -94,6 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .update({
             expo_push_token: token,
             updated_at: new Date().toISOString(),
+            deleted_at: null,
           })
           .eq('id', existingToken.id);
 
@@ -104,7 +120,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const { error: insertError } = await supabase
           .from('push_tokens')
           .insert({
-            profile_id: session?.user?.id,
+            profile_id: session.user.id,
+            tenant_id: profile.tenant_id,
             expo_push_token: token,
             platform,
           });
@@ -123,8 +140,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (session?.user?.id) {
         const { error } = await supabase
           .from('push_tokens')
-          .delete()
-          .eq('profile_id', session?.user?.id);
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('profile_id', session.user.id)
+          .is('deleted_at', null);
 
         if (error) {
           console.error('Error removing push token:', error);

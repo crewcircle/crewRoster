@@ -8,8 +8,6 @@ ALTER TABLE shifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE availability ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clock_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE push_tokens ENABLE ROW LEVEL SECURITY;
-ALTER TABLE channels ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- TENANTS: member can read; only owner can update
 CREATE POLICY "tenant_member_read" ON tenants
@@ -35,12 +33,7 @@ CREATE POLICY "profile_self_update" ON profiles
 CREATE POLICY "profile_manager_write" ON profiles
   FOR ALL USING (get_tenant_role(tenant_id) IN ('owner', 'manager'));
 
--- TENANT_MEMBERS: members can see their own row; managers can see all
-CREATE POLICY "tenant_member_self_read" ON tenant_members
-  FOR SELECT USING (
-    profile_id = (SELECT auth.uid()) OR
-    get_tenant_role(tenant_id) IN ('owner', 'manager')
-  );
+-- TENANT_MEMBERS: policies defined in 20260723_add_tenant_members.sql
 
 -- ROSTERS: all members read; manager/owner write
 CREATE POLICY "roster_member_read" ON rosters

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { startOfWeek, endOfWeek } from 'date-fns';
-import { useAuth } from '@/lib/clerk/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface TimesheetEntry {
   profile_id: string;
@@ -48,7 +48,7 @@ export function useTimesheets(): UseTimesheetsResult {
       const end = dateRange.end.toISOString();
 
       const response = await fetch(
-        `/api/timesheets?tenantId=${tenantId}&start=${start}&end=${end}`
+        `/api/timesheets?start=${start}&end=${end}`
       );
 
       if (!response.ok) {
