@@ -48,7 +48,7 @@ export function useTimesheets(): UseTimesheetsResult {
       const end = dateRange.end.toISOString();
 
       const response = await fetch(
-        `/api/timesheets?tenantId=${tenantId}&start=${start}&end=${end}`
+        `/api/timesheets?start=${start}&end=${end}`
       );
 
       if (!response.ok) {

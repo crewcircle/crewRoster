@@ -66,8 +66,6 @@ export default function RosterGrid() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [openShiftModal, setOpenShiftModal] = useState(false);
-  const [modalEmployeeId, setModalEmployeeId] = useState('');
-  const [modalDayIndex, setModalDayIndex] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [dragOverlay, setDragOverlay] = useState<React.ReactNode | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -77,8 +75,8 @@ export default function RosterGrid() {
   // Fetch roster + profiles on mount
   useEffect(() => {
     if (authLoading || !tenantId) return;
-    fetchCurrentRoster(tenantId, selectedWeekStart);
-    fetch(`/api/profiles?tenantId=${tenantId}`)
+    fetchCurrentRoster(selectedWeekStart);
+    fetch('/api/profiles')
       .then((res) => res.json())
       .then((data) => setProfiles(data.profiles as Profile[]))
       .catch(console.error);
@@ -202,7 +200,7 @@ export default function RosterGrid() {
       const response = await fetch('/api/roster', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'create-shift', tenantId, rosterId: roster?.id ?? null, profileId: shiftData.employeeId, startTime: shiftData.startTime, endTime: shiftData.endTime, roleLabel: shiftData.roleLabel || null, notes: shiftData.notes || null }),
+        body: JSON.stringify({ action: 'create-shift', rosterId: roster?.id ?? null, profileId: shiftData.employeeId, startTime: shiftData.startTime, endTime: shiftData.endTime, roleLabel: shiftData.roleLabel || null, notes: shiftData.notes || null }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
@@ -248,7 +246,7 @@ export default function RosterGrid() {
           <ShiftItem shift={shift} employee={employee} isReadOnly={isReadOnly} />
         ) : (
           <button
-            onClick={() => { if (!isReadOnly) { setModalEmployeeId(employeeId); setModalDayIndex(dayIndex); setOpenShiftModal(true); } }}
+            onClick={() => { if (!isReadOnly) { setOpenShiftModal(true); } }}
             className={`add-shift-btn p-1 rounded border border-dashed border-gray-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
             disabled={isReadOnly}
           >

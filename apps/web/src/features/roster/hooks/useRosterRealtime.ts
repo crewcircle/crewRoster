@@ -20,7 +20,7 @@ export function useRosterRealtime(tenantId: string | null) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'shifts', filter: `roster_id=eq.${roster.id}` },
         () => {
-          fetchCurrentRoster(tenantId, selectedWeekStart);
+          fetchCurrentRoster(selectedWeekStart);
         },
       )
       .subscribe();
@@ -35,7 +35,7 @@ export function useRosterRealtime(tenantId: string | null) {
     if (!roster?.id || !tenantId) return;
 
     pollRef.current = setInterval(() => {
-      fetchCurrentRoster(tenantId, selectedWeekStart);
+      fetchCurrentRoster(selectedWeekStart);
     }, 30_000);
 
     return () => {

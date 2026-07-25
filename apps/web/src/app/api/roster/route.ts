@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getTenantId } from '@/lib/supabase/getTenantId';
 
 // ---------------------------------------------------------------------------
 // GET  — fetch roster + shifts for a tenant/week
 // ---------------------------------------------------------------------------
 export async function GET(request: NextRequest) {
   try {
-    const client = await createClient();
+    const { tenantId, client } = await getTenantId();
     const { searchParams } = new URL(request.url);
-    const tenantId = searchParams.get('tenantId');
     const weekStart = searchParams.get('weekStart');
 
-    if (!tenantId || !weekStart) {
-      return NextResponse.json({ error: 'tenantId and weekStart required' }, { status: 400 });
+    if (!weekStart) {
+      return NextResponse.json({ error: 'weekStart required' }, { status: 400 });
     }
 
     // Find or create roster
@@ -60,6 +59,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ roster, shifts: shifts ?? [] });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Failed to fetch roster:', error);
     return NextResponse.json({ error: 'Failed to fetch roster' }, { status: 500 });
   }
@@ -70,9 +72,9 @@ export async function GET(request: NextRequest) {
 // ---------------------------------------------------------------------------
 export async function POST(request: NextRequest) {
   try {
-    const client = await createClient();
+    const { tenantId, client } = await getTenantId();
     const body = await request.json();
-    const { action, tenantId, weekStart, rosterId, shifts } = body;
+    const { action, weekStart, rosterId, shifts } = body;
 
     switch (action) {
       // -- publish ----------------------------------------------------------
@@ -199,7 +201,6 @@ export async function POST(request: NextRequest) {
         if (currentShiftIds.length > 0) {
           await softDeleteQuery.not('id', 'in', `(${currentShiftIds.join(',')})`);
         } else {
-          // All shifts removed — soft-delete everything for this roster
           await softDeleteQuery;
         }
 
@@ -279,6 +280,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Roster API error:', error);
     return NextResponse.json({ error: 'Failed to process roster request' }, { status: 500 });
   }

@@ -58,24 +58,21 @@ export async function unpublishRoster(rosterId: string): Promise<PublishRosterRe
 }
 
 export async function copyForwardRoster(
-  tenantId: string,
   weekStart: string,
   rosterId: string
 ): Promise<CopyForwardResult> {
   return apiPost<CopyForwardResult>('/api/roster', {
     action: 'copy-forward',
-    tenantId,
     weekStart,
     rosterId,
   });
 }
 
 export async function fetchCurrentRoster(
-  tenantId: string,
   weekStart: string
 ): Promise<FetchRosterResult> {
   return apiGet<FetchRosterResult>(
-    `/api/roster?tenantId=${encodeURIComponent(tenantId)}&weekStart=${encodeURIComponent(weekStart)}`
+    `/api/roster?weekStart=${encodeURIComponent(weekStart)}`
   );
 }
 

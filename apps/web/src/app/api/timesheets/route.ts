@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getTenantId } from '@/lib/supabase/getTenantId';
 
 export async function GET(request: NextRequest) {
   try {
-    const client = await createClient();
+    const { tenantId, client } = await getTenantId();
+
     const { searchParams } = new URL(request.url);
-    const tenantId = searchParams.get('tenantId');
     const start = searchParams.get('start');
     const end = searchParams.get('end');
 
-    if (!tenantId || !start || !end) {
-      return NextResponse.json({ error: 'tenantId, start, and end required' }, { status: 400 });
+    if (!start || !end) {
+      return NextResponse.json({ error: 'start and end required' }, { status: 400 });
     }
 
     // Fetch profiles + clock events for the tenant/date range
@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         first_name: profile?.first_name ?? '',
         last_name: profile?.last_name ?? '',
         email: profile?.email ?? '',
-        work_date: null, // derived from clock_in below
+        work_date: null,
         clock_in: g.clock_in,
         clock_out: g.clock_out,
         total_hours: totalHours,
@@ -119,6 +119,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ entries });
   } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     console.error('Error fetching timesheet entries:', error);
     return NextResponse.json({ error: 'Failed to fetch timesheets' }, { status: 500 });
   }
