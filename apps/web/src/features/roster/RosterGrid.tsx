@@ -1,48 +1,33 @@
-"use client";
+'use client';
 
-import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { 
-  DndContext, 
-  closestCenter, 
-  PointerSensor, 
-  useSensor, 
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
   KeyboardSensor,
-  defaultCoordinates,
   DragOverlay,
   type DragStartEvent,
   type DragOverEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { 
-  SortableContext, 
-  verticalListSortingStrategy,
-  arrayMove
-} from '@dnd-kit/sortable';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRosterStore } from '@/store/rosterStore';
-import { Shift } from '@/types/shift';
-import { Profile } from '@/types/profile';
-import { Roster } from '@/store/rosterStore';
+import type { Shift } from '@/types/shift';
+import type { Profile } from '@/types/profile';
+import type { Roster } from '@/store/rosterStore';
 import { Availability, detectConflicts } from '@packages/validators';
-
-interface ShiftFormData {
-  employeeId: string;
-  startTime: string;
-  endTime: string;
-  roleLabel: string;
-  notes: string;
-}
 import { useAuth } from '@/hooks/useAuth';
 import { z } from 'zod';
 import { shiftSchema } from '@/lib/validators/shift';
-// detectConflicts imported from @packages/validators above
 import { format } from 'date-fns';
 import { useRosterRealtime } from './hooks/useRosterRealtime';
+import ShiftCreationModal from './ShiftCreationModal';
+import ShiftItem from './ShiftItem';
+import RosterHeader, { DAYS_OF_WEEK } from './RosterHeader';
 
-// Constants
-const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-// Zod schema for shift creation (basic validation)
+// Zod schema for shift creation
 const shiftCreationSchema = z.object({
   employeeId: z.string(),
   startTime: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid start time'),
@@ -51,191 +36,57 @@ const shiftCreationSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Shift creation modal component
-const ShiftCreationModal: React.FC<{ 
-  open: boolean; 
-  onClose: () => void; 
-  onSave: (shiftData: z.infer<typeof shiftCreationSchema>) => void; 
-  employees: Profile[]; 
-}> = ({ open, onClose, onSave, employees }) => {
-   const [formData, setFormData] = useState<ShiftFormData>({
-     employeeId: '',
-     startTime: '',
-     endTime: '',
-     roleLabel: '',
-     notes: '',
-   });
-  const [errors, setErrors] = useState<{ [key: string]: string } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// Helper: get day-of-week index from timestamp in Sydney timezone
+function getDayFromTimestamp(timestamp: string): number {
+  const date = new Date(timestamp);
+  const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Australia/Sydney', weekday: 'short' });
+  const dayName = formatter.format(date);
+  return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(dayName);
+}
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const { name, value } = e.target;
-       setFormData((prev: ShiftFormData) => ({ ...prev, [name]: value }));
-      if (errors && errors[name]) {
-        setErrors((prev: { [key: string]: string } | null) => {
-          const newErrors = { ...prev };
-          delete newErrors[name];
-          return newErrors;
-        });
-      }
-    };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const parsed = shiftCreationSchema.parse(formData);
-      onSave(parsed);
-      onClose();
-     } catch (err) {
-       if (err instanceof z.ZodError) {
-         const errorMap: { [key: string]: string } = {};
-         err.issues.forEach((issue) => {
-           if (issue.path.length > 0) {
-             errorMap[issue.path[0] as string] = issue.message;
-           }
-         });
-         setErrors(errorMap);
-       } else {
-         console.error('Unexpected error:', err);
-       }
-     } finally {
-       setIsSubmitting(false);
-    }
-  };
-
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Add Shift</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Employee</label>
-            <select
-              value={formData.employeeId}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
-            >
-              <option value="">Select an employee</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.first_name} {emp.last_name}
-                </option>
-              ))}
-            </select>
-            {errors?.employeeId && <p className="text-red-500 text-sm mt-1">{errors.employeeId}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Start Time</label>
-            <input
-              type="datetime-local"
-              value={formData.startTime}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
-            />
-            {errors?.startTime && <p className="text-red-500 text-sm mt-1">{errors.startTime}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">End Time</label>
-            <input
-              type="datetime-local"
-              value={formData.endTime}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
-            />
-            {errors?.endTime && <p className="text-red-500 text-sm mt-1">{errors.endTime}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Role Label (optional)</label>
-            <input
-              type="text"
-              value={formData.roleLabel}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Notes (optional)</label>
-            <textarea
-              value={formData.notes}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isSubmitting}
-              rows={3}
-            />
-          </div>
-          <div className="flex justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-              disabled={isSubmitting || !formData.employeeId || !formData.startTime || !formData.endTime}
-            >
-              {isSubmitting ? 'Saving...' : 'Save Shift'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-const RosterGrid: React.FC = () => {
-    const store = useRosterStore();
-    const profiles: Profile[] = store.profiles;
-    const shifts: Shift[] = store.shifts;
-    const setShifts = store.setShifts;
-     const selectedWeekStart: string = store.selectedWeekStart;
-    const setSelectedWeekStart = store.setSelectedWeekStart;
-    const loading: boolean = store.loading;
-    const roster: Roster | null = store.roster;
-    const publishRoster: () => Promise<boolean> = store.publishRoster;
-   const unpublishRoster: () => Promise<boolean> = store.unpublishRoster;
-   const copyForwardRoster: () => Promise<boolean> = store.copyForwardRoster;
-   const operationError: string | null = store.operationError;
-   const isOperating: boolean = store.isOperating;
-    const setOperationError = store.setOperationError;
-   
-  const { user, tenantId, isLoading: authLoading, isDemoMode } = useAuth();
-  const [isSaving, setIsSaving] = useState(false);
-  const [openShiftModal, setOpenShiftModal] = useState(false);
-  const [modalEmployeeId, setModalEmployeeId] = useState<string>('');
-  const [modalDayIndex, setModalDayIndex] = useState<number>(0);
+export default function RosterGrid() {
+  const store = useRosterStore();
+  const profiles = store.profiles;
+  const shifts = store.shifts;
+  const setShifts = store.setShifts;
+  const selectedWeekStart = store.selectedWeekStart;
+  const setSelectedWeekStart = store.setSelectedWeekStart;
+  const loading = store.loading;
+  const roster = store.roster;
+  const publishRoster = store.publishRoster;
+  const unpublishRoster = store.unpublishRoster;
+  const copyForwardRoster = store.copyForwardRoster;
+  const operationError = store.operationError;
+  const isOperating = store.isOperating;
+  const setOperationError = store.setOperationError;
   const fetchCurrentRoster = store.fetchCurrentRoster;
   const setProfiles = store.setProfiles;
 
+  const { user, tenantId, isLoading: authLoading, isDemoMode } = useAuth();
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [openShiftModal, setOpenShiftModal] = useState(false);
+  const [modalEmployeeId, setModalEmployeeId] = useState('');
+  const [modalDayIndex, setModalDayIndex] = useState(0);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [dragOverlay, setDragOverlay] = useState<React.ReactNode | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const isReadOnly = roster?.status === 'published';
+
+  // Fetch roster + profiles on mount
   useEffect(() => {
-    if (authLoading) return;
-    if (!tenantId) return;
-    
+    if (authLoading || !tenantId) return;
     fetchCurrentRoster(tenantId, selectedWeekStart);
-    
     fetch(`/api/profiles?tenantId=${tenantId}`)
-      .then(res => res.json())
-      .then(data => setProfiles(data.profiles as Profile[]))
+      .then((res) => res.json())
+      .then((data) => setProfiles(data.profiles as Profile[]))
       .catch(console.error);
   }, [tenantId, selectedWeekStart, authLoading, fetchCurrentRoster, setProfiles]);
 
   useRosterRealtime(tenantId);
-  
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [dragOverlay, setDragOverlay] = useState<React.ReactNode | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Virtual rows for employees
+
+  // Virtual rows for employee list
   const rowVirtualizer = useVirtualizer({
     count: profiles.length,
     getScrollElement: () => scrollContainerRef.current,
@@ -243,276 +94,13 @@ const RosterGrid: React.FC = () => {
     overscan: 5,
   });
 
-  // Check if roster is published (read-only)
-  const isReadOnly = roster?.status === 'published';
-
-   // Handle drag start
-   const handleDragStart = (event: DragStartEvent) => {
-     if (isReadOnly) return;
-     const shiftId = String(event.active.id);
-     setActiveId(shiftId);
-     
-     // Set drag overlay content
-     const shift = shifts.find(s => s.id === shiftId);
-     if (shift) {
-       const employee = profiles.find(p => p.id === shift.profile_id);
-       if (employee) {
-         setDragOverlay(renderShiftItem(shift, employee));
-       }
-     }
-   };
-
-   const handleDragOver = (event: DragOverEvent) => {
-     const { active, over } = event;
-     if (String(active.id) === String(over?.id)) return;
-   };
-
-   const handleDragEnd = async (event: DragEndEvent) => {
-     if (isReadOnly) return;
-     
-     const { active, over } = event;
-     
-     if (over && String(active.id) !== String(over.id)) {
-       const activeIdStr = String(active.id);
-       const overIdStr = String(over.id);
-       if (activeIdStr.startsWith('shift-') && overIdStr.startsWith('cell-')) {
-         const shiftId = activeIdStr.split('-')[1];
-         const [, targetEmployeeId, targetDayIndexStr] = overIdStr.split('-');
-         const targetDayIndex = parseInt(targetDayIndexStr, 10);
-         
-         const shiftIndex = shifts.findIndex(s => s.id === shiftId);
-         if (shiftIndex !== -1) {
-           const shift = shifts[shiftIndex];
-           
-           // Calculate new start/end times for target day while preserving time
-           const originalStart = new Date(shift.start_time);
-           const originalEnd = new Date(shift.end_time);
-           const durationMs = originalEnd.getTime() - originalStart.getTime();
-           
-           // Get target date from week start + day index
-           const weekStartDate = new Date(selectedWeekStart);
-           weekStartDate.setDate(weekStartDate.getDate() + targetDayIndex);
-           const targetDateStr = weekStartDate.toISOString().split('T')[0];
-           
-           const newStartTime = new Date(targetDateStr + 'T' + originalStart.toISOString().split('T')[1]);
-           const newEndTime = new Date(newStartTime.getTime() + durationMs);
-           
-           // Optimistic update in store
-           const updatedShift = {
-             ...shift,
-             profile_id: targetEmployeeId,
-             start_time: newStartTime.toISOString(),
-             end_time: newEndTime.toISOString(),
-           };
-           
-           const newShifts = [...shifts];
-           newShifts[shiftIndex] = updatedShift;
-           setShifts(newShifts);
-           
-            // Persist to database
-            try {
-              await fetch('/api/roster', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'update-shift',
-                  shiftId,
-                  profileId: targetEmployeeId,
-                  startTime: newStartTime.toISOString(),
-                  endTime: newEndTime.toISOString(),
-                }),
-              });
-            } catch (err) {
-              console.error('Failed to update shift:', err);
-            }
-         }
-       }
-     }
-     
-     setActiveId(null);
-     setDragOverlay(null);
-   };
-
-   // Sensors
-   const pointerSensor = useSensor(PointerSensor, {
-     activationConstraint: {
-       distance: 5,
-     },
-   });
-   
-    const keyboardSensor = useSensor(KeyboardSensor);
-
-  // Render a shift item
-  const renderShiftItem = (shift: Shift, profile: Profile) => {
-    // Find the employee for this shift (should match the profile passed in)
-    const employee = profiles.find(p => p.id === shift.profile_id);
-    if (!employee) return null;
-    
-    // Format times for display (in local timezone - we'll use UTC for now)
-    const startTime = new Date(shift.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const endTime = new Date(shift.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    
-    // Calculate duration
-    const startDate = new Date(shift.start_time);
-    const endDate = new Date(shift.end_time);
-    const durationHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
-    
-    return (
-      <div
-        key={shift.id}
-        id={`shift-${shift.id}`}
-        role="option"
-        aria-label={`Shift for ${employee.first_name} ${employee.last_name} from ${startTime} to ${endTime}`}
-        className={`shift-item p-2 bg-blue-50 border border-blue-200 rounded ${isReadOnly ? 'cursor-default' : 'cursor-grab'}`}
-      >
-        <div className="font-medium text-xs">
-          {employee.first_name} {employee.last_name}
-        </div>
-        <div className="text-xs text-gray-600">
-          {startTime} - {endTime}
-        </div>
-        {shift.role_label && (
-          <div className="text-xs text-blue-600 italic">
-            {shift.role_label}
-          </div>
-        )}
-        <div className="text-xs text-gray-400">
-          {durationHours.toFixed(1)}h
-        </div>
-      </div>
-    );
-  };
-
-  // Render a cell (droppable area)
-  const renderCell = (employeeId: string, dayIndex: number) => {
-    // Find shifts for this employee on this day
-    const dayShifts = shifts.filter(shift => 
-      shift.profile_id === employeeId && 
-      !shift.deleted_at &&
-      getDayFromTimestamp(shift.start_time) === dayIndex
-    );
-    
-    // We'll assume at most one shift per day per employee for simplicity
-    const shift = dayShifts[0];
-    
-    // Find the employee
-    const employee = profiles.find(p => p.id === employeeId);
-    if (!employee) return null;
-    
-    // Determine if this cell is active (being dragged over)
-    const isActive = activeId === `cell-${employeeId}-${dayIndex}`;
-    
-    return (
-      <div
-        key={`${employeeId}-${dayIndex}`}
-        id={`cell-${employeeId}-${dayIndex}`}
-        role="option"
-        aria-label={`Cell for ${employee.first_name} ${employee.last_name} on ${DAYS_OF_WEEK[dayIndex]}`}
-        className={`cell h-full border border-gray-200 rounded flex flex-col items-center justify-center p-2 
-          ${isActive ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'}`
-        }
-        data-day={dayIndex}
-        data-employee-id={employeeId}
-      >
-        {shift ? (
-          renderShiftItem(shift, employee)
-        ) : (
-          <div className="text-center text-xs text-gray-400">
-            <button
-              onClick={() => {
-                if (isReadOnly) return; // Disable when published
-                // Open shift creation modal for this employee and day
-                setModalEmployeeId(employeeId);
-                setModalDayIndex(dayIndex);
-                setOpenShiftModal(true);
-              }}
-              className={`add-shift-btn p-1 rounded border border-dashed border-gray-400 ${
-                isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
-              }`}
-              disabled={isReadOnly}
-            >
-              +
-            </button>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Helper function to get day of week from timestamp (in Sydney timezone)
-  const getDayFromTimestamp = (timestamp: string): number => {
-    const date = new Date(timestamp);
-    // Use Intl.DateTimeFormat to get Sydney day-of-week independent of host timezone
-    const formatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Australia/Sydney', weekday: 'short' });
-    const dayName = formatter.format(date); // 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'
-    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(dayName);
-  };
-
-   // Week navigation
-   const goToPreviousWeek = () => {
-     const newDate = new Date(selectedWeekStart);
-     newDate.setDate(newDate.getDate() - 7);
-     setSelectedWeekStart(newDate.toISOString().split('T')[0]);
-   };
-
-   const goToNextWeek = () => {
-     const newDate = new Date(selectedWeekStart);
-     newDate.setDate(newDate.getDate() + 7);
-     setSelectedWeekStart(newDate.toISOString().split('T')[0]);
-   };
-
-  const weekStart = new Date(selectedWeekStart);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  const dateRange = `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
-
-  // Handle publish with confirmation
-  const handlePublish = async () => {
-    if (window.confirm('Are you sure you want to publish this roster? Shifts will become read-only.')) {
-      const success = await publishRoster();
-      if (!success && operationError) {
-        alert(operationError);
-      }
-    }
-  };
-
-  // Handle unpublish with confirmation
-  const handleUnpublish = async () => {
-    if (window.confirm('Are you sure you want to unpublish this roster? Shifts will become editable again.')) {
-      const success = await unpublishRoster();
-      if (!success && operationError) {
-        alert(operationError);
-      }
-    }
-  };
-
-  // Handle copy forward with confirmation
-  const handleCopyForward = async () => {
-    if (isDemoMode) return;
-    if (window.confirm('Copy shifts from this roster to the next week?')) {
-      const success = await copyForwardRoster();
-      if (!success && operationError) {
-        alert(operationError);
-      }
-    }
-  };
-
-  // Auto-save draft roster (debounced, every 5 seconds)
+  // Auto-save draft roster (debounced 5s)
   useEffect(() => {
     if (authLoading || isDemoMode || !user || !tenantId) return;
-
-    let saveTimeout: NodeJS.Timeout;
-    const saveRoster = async () => {
-      if (isDemoMode) return;
-      
+    const saveTimeout = setTimeout(async () => {
+      if (!roster?.id) return;
       try {
         setIsSaving(true);
-
-        if (!roster?.id) {
-          console.error('No roster ID to save to');
-          return;
-        }
-
         const response = await fetch('/api/roster', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -520,7 +108,7 @@ const RosterGrid: React.FC = () => {
             action: 'save-shifts',
             tenantId,
             rosterId: roster.id,
-            shifts: shifts.map(s => ({
+            shifts: shifts.map((s) => ({
               profile_id: s.profile_id,
               start_time: s.start_time,
               end_time: s.end_time,
@@ -529,172 +117,165 @@ const RosterGrid: React.FC = () => {
             })),
           }),
         });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || 'Failed to save roster');
-        }
-
-        console.log('Roster saved successfully');
+        if (!response.ok) throw new Error((await response.json()).error || 'Save failed');
       } catch (error) {
         console.error('Failed to save roster:', error);
       } finally {
         setIsSaving(false);
       }
-    };
+    }, 5000);
+    return () => clearTimeout(saveTimeout);
+  }, [shifts, tenantId, user, authLoading, isDemoMode, roster?.id]);
 
-    // Debounce the save function
-    const debouncedSave = () => {
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(saveRoster, 5000);
-    };
+  // --- Drag & drop handlers ---
+  const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 5 } });
+  const keyboardSensor = useSensor(KeyboardSensor);
 
-    debouncedSave();
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    if (isReadOnly) return;
+    const shiftId = String(event.active.id);
+    setActiveId(shiftId);
+    const shift = shifts.find((s) => s.id === shiftId);
+    const employee = shift ? profiles.find((p) => p.id === shift.profile_id) : undefined;
+    if (shift && employee) {
+      setDragOverlay(<ShiftItem shift={shift} employee={employee} isReadOnly={false} />);
+    }
+  }, [isReadOnly, shifts, profiles]);
 
-    return () => {
-      clearTimeout(saveTimeout);
-    };
-  }, [shifts, selectedWeekStart, user, tenantId, authLoading, isSaving, roster?.id]);
-
-  // Handle saving a shift from the modal
-  const handleSaveShift = async (shiftData: z.infer<typeof shiftCreationSchema>) => {
-    if (isReadOnly) {
-      alert('Cannot add shifts to a published roster.');
+  const handleDragEnd = useCallback(async (event: DragEndEvent) => {
+    if (isReadOnly) return;
+    const { active, over } = event;
+    if (!over || String(active.id) === String(over.id)) {
+      setActiveId(null);
+      setDragOverlay(null);
       return;
     }
-
-    if (isDemoMode) {
-      alert('Shift creation is disabled in demo mode.');
-      setOpenShiftModal(false);
+    const activeIdStr = String(active.id);
+    const overIdStr = String(over.id);
+    if (!activeIdStr.startsWith('shift-') || !overIdStr.startsWith('cell-')) {
+      setActiveId(null);
+      setDragOverlay(null);
       return;
     }
-
+    const shiftId = activeIdStr.split('-')[1];
+    const [, targetEmployeeId, targetDayIndexStr] = overIdStr.split('-');
+    const targetDayIndex = parseInt(targetDayIndexStr, 10);
+    const shiftIndex = shifts.findIndex((s) => s.id === shiftId);
+    if (shiftIndex === -1) return;
+    const shift = shifts[shiftIndex];
+    const durationMs = new Date(shift.end_time).getTime() - new Date(shift.start_time).getTime();
+    const weekStartDate = new Date(selectedWeekStart);
+    weekStartDate.setDate(weekStartDate.getDate() + targetDayIndex);
+    const targetDateStr = weekStartDate.toISOString().split('T')[0];
+    const newStartTime = new Date(targetDateStr + 'T' + new Date(shift.start_time).toISOString().split('T')[1]);
+    const newEndTime = new Date(newStartTime.getTime() + durationMs);
+    const updatedShift = { ...shift, profile_id: targetEmployeeId, start_time: newStartTime.toISOString(), end_time: newEndTime.toISOString() };
+    const newShifts = [...shifts];
+    newShifts[shiftIndex] = updatedShift;
+    setShifts(newShifts);
     try {
-      // Validate the shift data
-      const validated = shiftSchema.parse({
-        ...shiftData,
-        tenant_id: tenantId || "",
-        profile_id: shiftData.employeeId,
+      await fetch('/api/roster', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update-shift', shiftId, profileId: targetEmployeeId, startTime: newStartTime.toISOString(), endTime: newEndTime.toISOString() }),
       });
-
-       // TODO: Fetch availability and calculate weekly hours from Supabase or store
-       // For now, we'll use empty arrays and maps - this should be implemented properly
-       const availability: Availability[] = [];
-       const weeklyHoursMap = new Map<string, { profile_id: string; week_start: string; total_hours: number }>();
-       const lastShiftEnd = null; // TODO: Get last shift end time for this employee
-
-      // Check for conflicts
-      const conflictResult = detectConflicts(validated, shifts, availability, weeklyHoursMap, lastShiftEnd);
-      if (conflictResult.hasConflict) {
-        // Show conflict warning but allow override (soft mode)
-        if (!window.confirm(`Conflict detected: ${conflictResult.message}\n\nDo you want to add this shift anyway?`)) {
-          return;
-        }
-      }
-
-       // Create the shift via API route
-        const response = await fetch('/api/roster', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'create-shift',
-            tenantId,
-            rosterId: roster?.id || null,
-            profileId: shiftData.employeeId,
-            startTime: shiftData.startTime,
-            endTime: shiftData.endTime,
-            roleLabel: shiftData.roleLabel || null,
-            notes: shiftData.notes || null,
-          }),
-        });
-
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Failed to create shift');
-
-        setShifts([...shifts, result.shift as Shift]);
-
-      // Close the modal
-      setOpenShiftModal(false);
-      setModalEmployeeId("");
-      setModalDayIndex(0);
-
-      // Note: The auto-save effect will trigger because shifts changed,
-      // and it will save the entire roster (including this new shift) to Supabase.
-    } catch (error) {
-      console.error("Failed to save shift:", error);
-      alert("Failed to save shift. Please try again.");
+    } catch (err) {
+      console.error('Failed to update shift:', err);
     }
+    setActiveId(null);
+    setDragOverlay(null);
+  }, [isReadOnly, shifts, selectedWeekStart, setShifts]);
+
+  // --- Shift creation ---
+  const handleSaveShift = async (shiftData: z.infer<typeof shiftCreationSchema>) => {
+    if (isReadOnly) { alert('Cannot add shifts to a published roster.'); return; }
+    if (isDemoMode) { alert('Shift creation is disabled in demo mode.'); setOpenShiftModal(false); return; }
+    try {
+      shiftSchema.parse({ ...shiftData, tenant_id: tenantId || '', profile_id: shiftData.employeeId });
+      const availability: Availability[] = [];
+      const weeklyHoursMap = new Map<string, { profile_id: string; week_start: string; total_hours: number }>();
+      const conflictResult = detectConflicts(
+        { ...shiftData, tenant_id: tenantId || '', profile_id: shiftData.employeeId } as any,
+        shifts, availability, weeklyHoursMap, null,
+      );
+      if (conflictResult.hasConflict && !window.confirm(`Conflict: ${conflictResult.message}\n\nContinue?`)) return;
+      const response = await fetch('/api/roster', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create-shift', tenantId, rosterId: roster?.id ?? null, profileId: shiftData.employeeId, startTime: shiftData.startTime, endTime: shiftData.endTime, roleLabel: shiftData.roleLabel || null, notes: shiftData.notes || null }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setShifts([...shifts, result.shift as Shift]);
+      setOpenShiftModal(false);
+    } catch (error) {
+      console.error('Failed to save shift:', error);
+      alert('Failed to save shift. Please try again.');
+    }
+  };
+
+  // --- Week nav ---
+  const weekStart = new Date(selectedWeekStart);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  const dateRange = `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+
+  const goToPreviousWeek = () => { const d = new Date(selectedWeekStart); d.setDate(d.getDate() - 7); setSelectedWeekStart(d.toISOString().split('T')[0]); };
+  const goToNextWeek = () => { const d = new Date(selectedWeekStart); d.setDate(d.getDate() + 7); setSelectedWeekStart(d.toISOString().split('T')[0]); };
+  const handlePublish = async () => { if (window.confirm('Publish this roster? Shifts become read-only.')) { const ok = await publishRoster(); if (!ok && operationError) alert(operationError); } };
+  const handleUnpublish = async () => { if (window.confirm('Unpublish? Shifts become editable.')) { const ok = await unpublishRoster(); if (!ok && operationError) alert(operationError); } };
+  const handleCopyForward = async () => { if (isDemoMode) return; if (window.confirm('Copy shifts to next week?')) { const ok = await copyForwardRoster(); if (!ok && operationError) alert(operationError); } };
+
+  // --- Render helpers ---
+  const renderCell = (employeeId: string, dayIndex: number) => {
+    const dayShifts = shifts.filter(
+      (s) => s.profile_id === employeeId && !s.deleted_at && getDayFromTimestamp(s.start_time) === dayIndex,
+    );
+    const shift = dayShifts[0];
+    const employee = profiles.find((p) => p.id === employeeId);
+    if (!employee) return null;
+    return (
+      <div
+        key={`${employeeId}-${dayIndex}`}
+        id={`cell-${employeeId}-${dayIndex}`}
+        role="option"
+        aria-label={`Cell for ${employee.first_name} ${employee.last_name} on ${DAYS_OF_WEEK[dayIndex]}`}
+        className={`cell h-full border border-gray-200 rounded flex flex-col items-center justify-center p-2 ${activeId === `cell-${employeeId}-${dayIndex}` ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'}`}
+        data-day={dayIndex}
+        data-employee-id={employeeId}
+      >
+        {shift ? (
+          <ShiftItem shift={shift} employee={employee} isReadOnly={isReadOnly} />
+        ) : (
+          <button
+            onClick={() => { if (!isReadOnly) { setModalEmployeeId(employeeId); setModalDayIndex(dayIndex); setOpenShiftModal(true); } }}
+            className={`add-shift-btn p-1 rounded border border-dashed border-gray-400 ${isReadOnly ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}`}
+            disabled={isReadOnly}
+          >
+            +
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
     <div className="roster-grid p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={goToPreviousWeek}
-              className="px-3 py-1 border rounded hover:bg-gray-100"
-            >
-              ← Previous
-            </button>
-            <span className="font-medium">{dateRange}</span>
-            <button
-              onClick={goToNextWeek}
-              className="px-3 py-1 border rounded hover:bg-gray-100"
-            >
-              Next →
-            </button>
-          </div>
-
-          {isReadOnly && (
-            <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-              Read Only
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-center space-x-2">
-          {roster?.status === 'draft' && (
-            <button
-              onClick={handlePublish}
-              disabled={isOperating}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isOperating ? 'Publishing...' : 'Publish'}
-            </button>
-          )}
-          {roster?.status === 'published' && (
-            <>
-              <button
-                onClick={handleUnpublish}
-                disabled={isOperating}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isOperating ? 'Unpublishing...' : 'Unpublish'}
-              </button>
-              <button
-                onClick={handleCopyForward}
-                disabled={isOperating}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isOperating ? 'Copying...' : 'Copy Forward'}
-              </button>
-            </>
-          )}
-        </div>
-        
-        {operationError && (
-          <div className="mt-2 p-2 bg-red-100 text-red-800 text-sm rounded-md">
-            {operationError}
-            <button
-              onClick={() => setOperationError(null)}
-              className="ml-2 text-red-600 hover:text-red-800"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-      </div>
+      <RosterHeader
+        selectedWeekStart={selectedWeekStart}
+        dateRange={dateRange}
+        isReadOnly={isReadOnly}
+        isOperating={isOperating}
+        operationError={operationError}
+        isSaving={isSaving}
+        rosterStatus={roster?.status ?? null}
+        goToPreviousWeek={goToPreviousWeek}
+        goToNextWeek={goToNextWeek}
+        handlePublish={handlePublish}
+        handleUnpublish={handleUnpublish}
+        handleCopyForward={handleCopyForward}
+        setOperationError={setOperationError}
+      />
 
       {loading && (
         <div className="text-center py-8">
@@ -708,38 +289,24 @@ const RosterGrid: React.FC = () => {
           sensors={[pointerSensor, keyboardSensor]}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div 
-            ref={scrollContainerRef}
-            className="grid grid-cols-[200px_repeat(7,1fr)] gap-1 max-h-[600px] overflow-auto"
-          >
+          <div ref={scrollContainerRef} className="grid grid-cols-[200px_repeat(7,1fr)] gap-1 max-h-[600px] overflow-auto">
             <div className="font-semibold p-2 bg-gray-100 rounded sticky top-0 z-10">Employee</div>
             {DAYS_OF_WEEK.map((day) => (
               <div key={day} className="font-semibold p-2 bg-gray-100 text-center rounded sticky top-0 z-10">
                 {day}
               </div>
             ))}
-
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const profile = profiles[virtualRow.index];
               return (
                 <React.Fragment key={profile.id}>
-                  <div 
-                    className="p-2 bg-gray-50 border-t flex items-center sticky left-0 z-[1]"
-                    style={{ height: `${virtualRow.size}px` }}
-                  >
-                    <div className="font-medium">
-                      {profile.first_name} {profile.last_name}
-                    </div>
+                  <div className="p-2 bg-gray-50 border-t flex items-center sticky left-0 z-[1]" style={{ height: `${virtualRow.size}px` }}>
+                    <div className="font-medium">{profile.first_name} {profile.last_name}</div>
                   </div>
                   {DAYS_OF_WEEK.map((_, dayIndex) => (
-                    <div 
-                      key={`${profile.id}-${dayIndex}`} 
-                      className="min-h-[80px]"
-                      style={{ height: `${virtualRow.size}px` }}
-                    >
+                    <div key={`${profile.id}-${dayIndex}`} className="min-h-[80px]" style={{ height: `${virtualRow.size}px` }}>
                       {renderCell(profile.id, dayIndex)}
                     </div>
                   ))}
@@ -747,29 +314,11 @@ const RosterGrid: React.FC = () => {
               );
             })}
           </div>
-          <DragOverlay>
-            {dragOverlay}
-          </DragOverlay>
+          <DragOverlay>{dragOverlay}</DragOverlay>
         </DndContext>
       )}
 
-      <ShiftCreationModal
-        open={openShiftModal}
-        onClose={() => setOpenShiftModal(false)}
-        onSave={handleSaveShift}
-        employees={profiles}
-      />
-
-      <div className="mt-4 flex items-center space-x-4 text-sm text-gray-600">
-        {isSaving && <span>Saving...</span>}
-        {roster && (
-          <span>
-            Status: <span className="font-medium capitalize">{roster.status}</span>
-          </span>
-        )}
-      </div>
+      <ShiftCreationModal open={openShiftModal} onClose={() => setOpenShiftModal(false)} onSave={handleSaveShift} employees={profiles} />
     </div>
   );
-};
-
-export default RosterGrid;
+}
