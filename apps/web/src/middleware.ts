@@ -39,10 +39,18 @@ export async function middleware(request: NextRequest) {
     },
   );
 
-  // Refresh the session — this updates the auth cookies if needed
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh the session — this updates the auth cookies if needed.
+  // Degrade gracefully: if auth is unreachable (network error, missing env vars),
+  // treat the user as unauthenticated rather than crashing the middleware.
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user ?? null;
+  } catch {
+    // Auth service unreachable — public paths are still served;
+    // protected paths redirect to /login (which will also fail, but
+    // the middleware itself does not crash).
+  }
 
   // Redirect unauthenticated users away from protected routes
   if (!user && !isPublicPath(request.nextUrl.pathname)) {
