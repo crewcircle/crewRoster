@@ -35,11 +35,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.7",
+    "eslint-config-next": "16.2.12",
     "eslint-plugin-react": "^7.37.5",
     "jsdom": "^24.0.0",
     "tailwindcss": "^4",
     "typescript": "^6",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.10"
   }
 }
