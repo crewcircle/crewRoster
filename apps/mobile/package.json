@@ -12,9 +12,9 @@
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "^3.1.1",
     "@react-native-community/geolocation": "^3.4.0",
-    "@react-navigation/bottom-tabs": "^7.18.0",
-    "@react-navigation/native": "^7.3.1",
-    "@supabase/supabase-js": "^2.108.1",
+    "@react-navigation/bottom-tabs": "^7.18.15",
+    "@react-navigation/native": "^7.3.15",
+    "@supabase/supabase-js": "^2.112.2",
     "expo": "~55.0.23",
     "expo-crypto": "^55.0.14",
     "expo-device": "^56.0.4",
@@ -24,14 +24,14 @@
     "expo-sqlite": "^55.0.15",
     "expo-status-bar": "~55.0.6",
     "expo-task-manager": "^55.0.15",
-    "react": "19.2.7",
-    "react-native": "0.86.0",
+    "react": "19.2.8",
+    "react-native": "0.86.2",
     "react-native-geolocation-service": "^5.3.1",
-    "react-native-safe-area-context": "^5.8.0",
-    "react-native-screens": "^4.25.2"
+    "react-native-safe-area-context": "^5.8.1",
+    "react-native-screens": "^4.26.2"
   },
   "devDependencies": {
-    "@types/react": "~19.2.17",
+    "@types/react": "~19.2.18",
     "typescript": "~6.0.3"
   },
   "private": true
